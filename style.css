@@ -13,15 +13,21 @@ body {
 }
 
 #planetCanvas {
-    flex: 1 1 auto;
-    background-color: #000;
-    display: block;
-    width: 100%;
-    height: 100vh;
-    cursor: grab;
-    touch-action: none;
-    -webkit-tap-highlight-color: transparent;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 380px; /* reserve space for biomeList */
+  bottom: 0;
+  background-color: #000;
+  cursor: grab;
+  user-select: none;
+  z-index: 0;
+  width: auto;
+  height: 100vh;
+  -webkit-tap-highlight-color: transparent;
+  transition: right 0.3s ease;
 }
+
 
 #biomeList {
     width: 380px;
@@ -143,4 +149,111 @@ body {
 .toggle,
 .toggle-circle {
     pointer-events: none;
+}
+
+/*###############################################*/
+
+/* Hamburger button fixed top-right offset to the left of biomeList */
+#hamburgerBtn {
+    position: fixed;
+    top: 10px;
+    right: 390px;
+    /* 380 (biomeList) + 10 px margin */
+    width: 32px;
+    height: 32px;
+    background: #444;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    padding: 4px 6px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    align-items: center;
+    z-index: 1100;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+    transition: right 0.3s ease;
+}
+
+#hamburgerBtn span {
+    display: block;
+    width: 20px;
+    height: 2.5px;
+    background: white;
+    border-radius: 2px;
+}
+
+/* Biome list fixed on the right */
+#biomeList {
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: 380px;
+    height: 100vh;
+    overflow-y: auto;
+    background-color: #222;
+    padding: 10px;
+    box-sizing: border-box;
+    user-select: none;
+    transition: transform 0.3s ease;
+    z-index: 1000;
+}
+
+/* Slide biome list out of view */
+#biomeList.closed {
+    transform: translateX(100%);
+}
+
+/* Canvas fills space left by biome list */
+#planetCanvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 380px;
+    /* reserve space for biomeList */
+    bottom: 0;
+    background-color: #000;
+    cursor: grab;
+    user-select: none;
+    z-index: 0;
+    width: auto;
+    height: 100vh;
+    -webkit-tap-highlight-color: transparent;
+    transition: right 0.3s ease;
+}
+
+/* Canvas expands when biome list hidden */
+#biomeList.closed~#planetCanvas {
+    right: 0;
+}
+
+/* Hamburger moves to right edge when biome list closed */
+#hamburgerBtn.closed {
+    right: 10px;
+}
+
+/* Responsive on small screens */
+@media (max-width: 480px) {
+    #hamburgerBtn {
+        right: 90vw;
+        /* default when open: 80vw + 10 margin */
+    }
+
+    #hamburgerBtn.closed {
+        right: 10px;
+    }
+
+    #biomeList {
+        width: 80vw;
+    }
+
+    #biomeList.closed {
+        transform: translateX(100%);
+    }
+
+    #planetCanvas {
+        right: 80vw;
+    }
 }

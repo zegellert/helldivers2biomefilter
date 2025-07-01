@@ -1,4 +1,4 @@
-const devmode = false;
+const devmode = true;
 
 const sidebarWidth = 380;
 const canvas = document.getElementById("planetCanvas");
@@ -530,3 +530,60 @@ function roundRect(ctx, x, y, width, height, radius) {
     ctx.quadraticCurveTo(x, y, x + radius, y);
     ctx.closePath();
 }
+
+/*#######################################*/
+
+const hamburgerBtn = document.getElementById("hamburgerBtn");
+const biomeList = document.getElementById("biomeList");
+
+// Start open
+biomeList.classList.remove("closed");
+hamburgerBtn.classList.remove("closed");
+hamburgerBtn.setAttribute("aria-expanded", "true");
+
+function updateCanvasRight() {
+  const isClosed = biomeList.classList.contains("closed");
+  const vw = window.innerWidth;
+
+  if (vw <= 480) {
+    // small screen
+    canvas.style.right = isClosed ? "0" : "80vw";
+  } else {
+    // desktop
+    canvas.style.right = isClosed ? "0" : "380px";
+  }
+}
+
+hamburgerBtn.addEventListener("click", () => {
+  biomeList.classList.toggle("closed");
+  hamburgerBtn.classList.toggle("closed");
+
+  const expanded = !biomeList.classList.contains("closed");
+  hamburgerBtn.setAttribute("aria-expanded", expanded ? "true" : "false");
+
+  // Update canvas CSS position (you already do this)
+  updateCanvasRight();
+
+  // Update canvas pixel size based on biomeList state:
+  const vw = window.innerWidth;
+  const sidebarWidth = expanded
+    ? (vw <= 480 ? vw * 0.8 : 380)
+    : 0;
+
+  // Resize canvas pixel size properly:
+  canvas.width = vw - sidebarWidth;
+  canvas.height = window.innerHeight;
+  canvas.style.width = (vw - sidebarWidth) + "px";
+  canvas.style.height = window.innerHeight + "px";
+
+  // Re-draw to reflect size change:
+  clampOffset();
+  drawPlanets();
+});
+
+
+// Sync on window resize too
+window.addEventListener("resize", updateCanvasRight);
+
+
+
