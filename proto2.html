@@ -2,214 +2,281 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8" />
-    <title>Planets & Biomes</title>
-    <style>
-        body {
-            margin: 0;
-            display: flex;
-            font-family: sans-serif;
-            background: #111;
-            color: white;
-            height: 100vh;
-            overflow: hidden;
-        }
+  <meta charset="UTF-8" />
+  <title>Planets & Biomes</title>
+  <style>
+    body {
+      margin: 0;
+      display: flex;
+      font-family: sans-serif;
+      background: #111;
+      color: white;
+      height: 100vh;
+      overflow: hidden;
+    }
 
-        #planetCanvas {
-            flex: 1 1 auto;
-            background-color: #000;
-            display: block;
-            width: 1000px;
-            height: 100vh;
-        }
+    #planetCanvas {
+      flex: 1 1 auto;
+      background-color: #000;
+      display: block;
+      width: 100%;
+      height: 100vh;
+    }
 
-        #biomeList {
-            width: 380px;
-            height: 100vh;
-            overflow-y: auto;
-            background-color: #222;
-            padding: 10px;
-            box-sizing: border-box;
-        }
+    #biomeList {
+      width: 380px;
+      height: 100vh;
+      overflow-y: auto;
+      background-color: #222;
+      padding: 10px;
+      box-sizing: border-box;
+    }
 
-        .biome {
-            margin-bottom: 10px;
-            cursor: pointer;
-            opacity: 0.4;
-            transition: opacity 0.2s, border 0.2s;
-            border: 2px solid transparent;
-            border-radius: 5px;
-        }
+    .biome {
+      margin-bottom: 10px;
+      cursor: pointer;
+      opacity: 0.4;
+      transition: opacity 0.2s, border 0.2s;
+      border: 2px solid transparent;
+      border-radius: 5px;
+    }
 
-        .biome img {
-            width: 100%;
-            border-radius: 5px;
-            display: block;
-            user-select: none;
-        }
+    .biome img {
+      width: 100%;
+      border-radius: 5px;
+      display: block;
+      user-select: none;
+    }
 
-        .biome.selected {
-            opacity: 1;
-            border-color: #0ff;
-        }
-    </style>
+    .biome.selected {
+      opacity: 1;
+      border-color: #0ff;
+    }
+  </style>
 </head>
 
 <body>
 
-    <canvas id="planetCanvas" width="1600"></canvas>
-    <div id="biomeList"></div>
+  <canvas id="planetCanvas"></canvas>
+  <div id="biomeList"></div>
 
-    <script>
-        const sidebarWidth = 400;
-        const canvas = document.getElementById("planetCanvas");
-        const ctx = canvas.getContext("2d");
+  <script>
+    const sidebarWidth = 380;
+    const canvas = document.getElementById("planetCanvas");
+    const ctx = canvas.getContext("2d");
 
-        function updateCanvasSize() {
-            const width = window.innerWidth - sidebarWidth;
-            const height = window.innerHeight;
+    // Set canvas size to fill remaining width and full height
+    function updateCanvasSize() {
+      const width = window.innerWidth - sidebarWidth;
+      const height = window.innerHeight;
 
-            canvas.width = width;
-            canvas.height = height;
+      canvas.width = width;
+      canvas.height = height;
 
-            canvas.style.width = width + "px";
-            canvas.style.height = height + "px";
-        }
+      canvas.style.width = width + "px";
+      canvas.style.height = height + "px";
+    }
 
-        updateCanvasSize();
+    updateCanvasSize();
+    window.addEventListener('resize', () => {
+      updateCanvasSize();
+      drawPlanets();
+    });
 
-        let allPlanets = [];
-        let selectedBiome = null; // null means show all planets
+    let allPlanets = [];
+    let selectedBiome = null; // null means show all planets
 
-        // Use canvas.width and canvas.height dynamically in your drawing code
-        const canvasWidth = canvas.width;
-        const canvasHeight = canvas.height;
+    let playablePlanetsSet = new Set();
 
-        // Load biomes and setup biome list including default button
-        fetch('biomes.json')
-            .then(res => res.json())
-            .then(biomes => {
-                const biomeList = document.getElementById("biomeList");
+    const backgroundImg = new Image();
+    backgroundImg.src = 'images/sectors_upscaled_dimmed.png';
+    backgroundImg.onload = () => {
+      drawPlanets();
+    };
 
-                // Default button to show all planets
-                const defaultBtn = document.createElement("div");
-                defaultBtn.className = "biome selected";
-                defaultBtn.dataset.name = "";
-                const defaultImg = document.createElement("img");
-                defaultImg.src = "images/default.jpg";
-                defaultImg.alt = "All Biomes";
-                defaultImg.title = "Show All Planets";
-                defaultBtn.appendChild(defaultImg);
-                biomeList.appendChild(defaultBtn);
+    // Hover tracking
+    let hoveredPlanet = null;
+    const planetRadius = 8;
 
-                defaultBtn.addEventListener("click", () => {
-                    selectedBiome = null;
-                    updateSelection(defaultBtn);
-                    drawPlanets();
-                });
+    // Cache for biome images
+    const biomeImageCache = new Map();
 
-                // Create biome buttons
-                biomes.forEach(biome => {
-                    const div = document.createElement("div");
-                    div.className = "biome";
-                    div.dataset.name = biome.name;
+    // Load biomes and preload images
+    fetch('biomes.json')
+      .then(res => res.json())
+      .then(biomes => {
+        const biomeList = document.getElementById("biomeList");
 
-                    const img = document.createElement("img");
-                    img.src = biome.image;
-                    img.alt = biome.name;
-                    img.title = biome.name;
+        // Preload default image for "all biomes"
+        const defaultImg = new Image();
+        defaultImg.src = "images/default.jpg";
+        biomeImageCache.set("", defaultImg);
 
-                    div.appendChild(img);
-                    biomeList.appendChild(div);
+        // Default button to show all planets
+        const defaultBtn = document.createElement("div");
+        defaultBtn.className = "biome selected";
+        defaultBtn.dataset.name = "";
+        const defaultImgElem = document.createElement("img");
+        defaultImgElem.src = "images/default.jpg";
+        defaultImgElem.alt = "All Biomes";
+        defaultImgElem.title = "Show All Planets";
+        defaultBtn.appendChild(defaultImgElem);
+        biomeList.appendChild(defaultBtn);
 
-                    div.addEventListener("click", () => {
-                        selectedBiome = biome.name;
-                        updateSelection(div);
-                        drawPlanets();
-                    });
-                });
-
-                function updateSelection(selectedDiv) {
-                    document.querySelectorAll(".biome").forEach(el => {
-                        el.classList.remove("selected");
-                    });
-                    selectedDiv.classList.add("selected");
-                }
-            });
-
-        // Load planets
-        fetch('planets.json')
-            .then(res => res.json())
-            .then(planets => {
-                allPlanets = planets;
-                drawPlanets();
-            });
-
-        const backgroundImg = new Image();
-        backgroundImg.src = 'images/sectors_upscaled_dimmed.png';
-
-        backgroundImg.onload = () => {
-            drawPlanets();
-        };
-
-        let playablePlanetsSet = new Set();
-
-        Promise.all([
-            fetch('planets.json').then(res => res.json()),
-            fetch('playable_planets.json').then(res => res.json())
-        ]).then(([planets, playablePlanets]) => {
-            console.log("Playable planets loaded:", playablePlanets);
-            allPlanets = planets;
-            console.log("AllPlanets", planets)
-            // Assuming 'index' uniquely identifies planets
-            playablePlanetsSet = new Set(playablePlanets.map(p => p.planet.index));
-            console.log("Playable planet indexes:", Array.from(playablePlanetsSet));
-            drawPlanets();
+        defaultBtn.addEventListener("click", () => {
+          selectedBiome = null;
+          updateSelection(defaultBtn);
+          drawPlanets();
         });
 
-        function drawPlanets() {
-            ctx.clearRect(0, 0, canvasWidth, canvasHeight);
-            ctx.drawImage(backgroundImg, 0, 0, canvasWidth, canvasHeight);
+        // Create biome buttons and preload images
+        biomes.forEach(biome => {
+          const div = document.createElement("div");
+          div.className = "biome";
+          div.dataset.name = biome.name;
 
-            const ownerColors = {
-                "Humans": "cyan",
-                "Automaton": "red",
-                "Terminids": "yellow",
-                "Illuminate": "purple"
-            };
+          const img = new Image();
+          img.src = biome.image;
+          biomeImageCache.set(biome.name, img);
 
-            allPlanets
-                .filter(planet => !selectedBiome || planet.biome.name === selectedBiome)
-                .forEach(planet => {
-                    const x = (planet.position.x + 1) / 2 * canvasWidth;
-                    const y = (1 - (planet.position.y + 1) / 2) * canvasHeight;
+          const imgElem = document.createElement("img");
+          imgElem.src = biome.image;
+          imgElem.alt = biome.name;
+          imgElem.title = biome.name;
 
-                    ctx.beginPath();
-                    ctx.arc(x, y, 8, 0, Math.PI * 2);
+          div.appendChild(imgElem);
+          biomeList.appendChild(div);
 
-                    const isPlayable = playablePlanetsSet.has(planet.index);
-
-                    if (isPlayable) {
-                        ctx.fillStyle = ownerColors[planet.currentOwner] || "white";
-                    } else {
-                        ctx.fillStyle = "grey";
-                    }
-
-                    ctx.fill();
-
-                    ctx.fillStyle = isPlayable ? "white" : "#777";
-                    ctx.font = "12px Arial";
-                    ctx.fillText(planet.name, x + 10, y + 4);
-                });
-        }
-
-
-        // Resize canvas on window resize
-        window.addEventListener('resize', () => {
-            canvas.height = window.innerHeight;
+          div.addEventListener("click", () => {
+            selectedBiome = biome.name;
+            updateSelection(div);
             drawPlanets();
+          });
         });
-    </script>
+
+        function updateSelection(selectedDiv) {
+          document.querySelectorAll(".biome").forEach(el => {
+            el.classList.remove("selected");
+          });
+          selectedDiv.classList.add("selected");
+        }
+      });
+
+    // Load planets and playable planets
+    Promise.all([
+      fetch('planets.json').then(res => res.json()),
+      fetch('playable_planets.json').then(res => res.json())
+    ]).then(([planets, playablePlanets]) => {
+      allPlanets = planets;
+      playablePlanetsSet = new Set(playablePlanets.map(p => p.planet.index));
+      drawPlanets();
+    });
+
+    // Owner colors map
+    const ownerColors = {
+      "Humans": "cyan",
+      "Automaton": "red",
+      "Terminids": "yellow",
+      "Illuminate": "purple"
+    };
+
+    // Mouse move to track hover planet
+    canvas.addEventListener("mousemove", e => {
+      const rect = canvas.getBoundingClientRect();
+      const mouseX = e.clientX - rect.left;
+      const mouseY = e.clientY - rect.top;
+
+      hoveredPlanet = null;
+
+      for (const planet of allPlanets) {
+        if (selectedBiome && planet.biome.name !== selectedBiome) continue;
+
+        const x = (planet.position.x + 1) / 2 * canvas.width;
+        const y = (1 - (planet.position.y + 1) / 2) * canvas.height;
+
+        const dx = mouseX - x;
+        const dy = mouseY - y;
+
+        if (Math.sqrt(dx * dx + dy * dy) <= planetRadius) {
+          hoveredPlanet = planet;
+          break;
+        }
+      }
+
+      drawPlanets();
+    });
+
+    function drawPlanets() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(backgroundImg, 0, 0, canvas.width, canvas.height);
+
+      allPlanets
+        .filter(planet => !selectedBiome || planet.biome.name === selectedBiome)
+        .forEach(planet => {
+          const x = (planet.position.x + 1) / 2 * canvas.width;
+          const y = (1 - (planet.position.y + 1) / 2) * canvas.height;
+
+          ctx.beginPath();
+          ctx.arc(x, y, planetRadius, 0, Math.PI * 2);
+
+          const isPlayable = playablePlanetsSet.has(planet.index);
+          ctx.fillStyle = isPlayable
+            ? (ownerColors[planet.currentOwner] || "white")
+            : "grey";
+
+          ctx.fill();
+
+          ctx.fillStyle = isPlayable ? "white" : "#777";
+          ctx.font = "12px Arial";
+          ctx.fillText(planet.name, x + 10, y + 4);
+        });
+
+      if (hoveredPlanet) {
+        drawPopup(hoveredPlanet);
+      }
+    }
+
+    // Draw popup with biome name and cached image
+    function drawPopup(planet) {
+      const x = (planet.position.x + 1) / 2 * canvas.width;
+      const y = (1 - (planet.position.y + 1) / 2) * canvas.height;
+
+      const boxWidth = 180;
+      const boxHeight = 100;
+      const radius = 10;
+
+      // Draw translucent rounded rect background (blue)
+      ctx.fillStyle = "rgba(0, 122, 204, 0.8)";
+      roundRect(ctx, x + 15, y - boxHeight / 2, boxWidth, boxHeight, radius);
+      ctx.fill();
+
+      // Biome name text
+      ctx.fillStyle = "white";
+      ctx.font = "bold 16px Arial";
+      ctx.fillText(planet.biome.name, x + 25, y - boxHeight / 2 + 25);
+
+      // Draw biome image from cache synchronously
+      const img = biomeImageCache.get(planet.biome.name);
+      if (img && img.complete) {
+        ctx.drawImage(img, x + 25, y - boxHeight / 2 + 35, 140, 60);
+      }
+    }
+
+    // Helper function: draw rounded rect
+    function roundRect(ctx, x, y, width, height, radius) {
+      ctx.beginPath();
+      ctx.moveTo(x + radius, y);
+      ctx.lineTo(x + width - radius, y);
+      ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+      ctx.lineTo(x + width, y + height - radius);
+      ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+      ctx.lineTo(x + radius, y + height);
+      ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+      ctx.lineTo(x, y + radius);
+      ctx.quadraticCurveTo(x, y, x + radius, y);
+      ctx.closePath();
+    }
+  </script>
 
 </body>
 
