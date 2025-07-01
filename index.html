@@ -200,6 +200,7 @@
                     hideUnplayable = !hideUnplayable;
                 } else {
                     selectedBiome = null;
+                    hideUnplayable = false;
                 }
                 updateSelection(defaultBtn);
                 drawPlanets();
@@ -248,6 +249,7 @@
                 div.addEventListener("click", () => {
                     if (selectedBiome !== biome.name) {
                         selectedBiome = biome.name;
+                        hideUnplayable = false;
                         updateSelection(div);
                         drawPlanets();
                     }
