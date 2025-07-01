@@ -198,13 +198,13 @@
             defaultBtn.addEventListener("click", () => {
                 if (selectedBiome === null) {
                     hideUnplayable = !hideUnplayable;
+                } else {
+                    selectedBiome = null;
+                    hideUnplayable = false;
                 }
-                selectedBiome = null;
                 updateSelection(defaultBtn);
                 drawPlanets();
             });
-
-
 
             biomes.forEach(biome => {
                 const div = document.createElement("div");
