@@ -104,6 +104,49 @@
         .biome.selected .hover-name {
             display: block;
         }
+
+        .toggle-wrapper {
+            position: absolute;
+            top: 6px;
+            left: 6px;
+            display: flex;
+            align-items: center;
+            user-select: none;
+            pointer-events: none;
+        }
+
+        .toggle {
+            width: 32px;
+            height: 18px;
+            background-color: #888;
+            border-radius: 9px;
+            position: relative;
+            transition: background-color 0.3s ease;
+            flex-shrink: 0;
+        }
+
+        .toggle.on {
+            background-color: #f9d71c;
+            box-shadow: 0 0 6px 1px #f9d71c99;
+        }
+
+        .toggle-circle {
+            width: 14px;
+            height: 14px;
+            background-color: white;
+            border-radius: 50%;
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            transition: left 0.3s ease;
+            box-shadow: 0 0 4px rgba(0,0,0,0.4);
+        }
+
+        .toggle.on .toggle-circle {
+            left: 16px;
+            background-color: #fff842;
+            box-shadow: 0 0 6px #f9d71c;
+        }
     </style>
 </head>
 
@@ -182,6 +225,23 @@
             defaultImgElem.title = "Show All Planets";
             defaultBtn.appendChild(defaultImgElem);
 
+            const defaultToggleWrapper = document.createElement("div");
+            defaultToggleWrapper.className = "toggle-wrapper";
+
+            const defaultToggle = document.createElement("div");
+            defaultToggle.className = "toggle off";
+            defaultToggleWrapper.appendChild(defaultToggle);
+
+            const defaultToggleCircle = document.createElement("div");
+            defaultToggleCircle.className = "toggle-circle";
+            defaultToggle.appendChild(defaultToggleCircle);
+
+            const defaultUnplayableCircle = document.createElement("div");
+            defaultUnplayableCircle.className = "unplayable-indicator";
+            defaultToggleWrapper.appendChild(defaultUnplayableCircle);
+
+            defaultBtn.appendChild(defaultToggleWrapper);
+
             const defaultHoverName = document.createElement("div");
             defaultHoverName.className = "hover-name";
             defaultBtn.appendChild(defaultHoverName);
@@ -204,7 +264,22 @@
                 div.querySelector(".hover-name").textContent = hide ? baseText + " (Only Playable Planets)" : baseText;
             }
 
+            function updateToggle(div, biomeName) {
+                const hide = hideUnplayableMap.get(biomeName);
+                const toggle = div.querySelector(".toggle");
+                if (!toggle) return;
+
+                if (hide) {
+                    toggle.classList.add("on");
+                    toggle.classList.remove("off");
+                } else {
+                    toggle.classList.remove("on");
+                    toggle.classList.add("off");
+                }
+            }
+
             updateHoverName(defaultBtn, "");
+            updateToggle(defaultBtn, "");
 
             defaultBtn.addEventListener("click", () => {
                 const biomeName = "";
@@ -212,11 +287,13 @@
                     const current = hideUnplayableMap.get(biomeName);
                     hideUnplayableMap.set(biomeName, !current);
                     updateHoverName(defaultBtn, biomeName);
+                    updateToggle(defaultBtn, biomeName);
                     drawPlanets();
                 } else {
                     selectedBiome = null;
                     updateSelection(defaultBtn);
                     updateHoverName(defaultBtn, biomeName);
+                    updateToggle(defaultBtn, biomeName);
                     document.querySelectorAll(".biome").forEach(el => {
                         if (el !== defaultBtn) el.classList.remove("selected");
                     });
@@ -240,6 +317,23 @@
                 imgElem.title = biome.name;
 
                 div.appendChild(imgElem);
+
+                const toggleWrapper = document.createElement("div");
+                toggleWrapper.className = "toggle-wrapper";
+
+                const toggle = document.createElement("div");
+                toggle.className = "toggle off";
+                toggleWrapper.appendChild(toggle);
+
+                const toggleCircle = document.createElement("div");
+                toggleCircle.className = "toggle-circle";
+                toggle.appendChild(toggleCircle);
+
+                const unplayableCircle = document.createElement("div");
+                unplayableCircle.className = "unplayable-indicator";
+                toggleWrapper.appendChild(unplayableCircle);
+
+                div.appendChild(toggleWrapper);
 
                 const hoverName = document.createElement("div");
                 hoverName.className = "hover-name";
@@ -265,6 +359,7 @@
                 biomeList.appendChild(div);
 
                 updateHoverName(div, biome.name);
+                updateToggle(div, biome.name);
 
                 div.addEventListener("click", () => {
                     const biomeName = biome.name;
@@ -272,6 +367,7 @@
                         selectedBiome = biomeName;
                         updateSelection(div);
                         updateHoverName(div, biomeName);
+                        updateToggle(div, biomeName);
                         defaultBtn.classList.remove("selected");
                         document.querySelectorAll(".biome").forEach(el => {
                             if (el !== div) el.classList.remove("selected");
@@ -281,6 +377,7 @@
                         const current = hideUnplayableMap.get(biomeName);
                         hideUnplayableMap.set(biomeName, !current);
                         updateHoverName(div, biomeName);
+                        updateToggle(div, biomeName);
                         drawPlanets();
                     }
                 });
@@ -504,7 +601,7 @@
         function getTouchCenter(touches) {
             return {
                 x: (touches[0].clientX + touches[1].clientX) / 2,
-                y: (touches[0].clientY + touches[1].clientY) / 2
+                y: (e.touches[0].clientY + touches[1].clientY) / 2
             };
         }
 
