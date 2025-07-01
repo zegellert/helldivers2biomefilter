@@ -21,6 +21,7 @@
             display: block;
             width: 100%;
             height: 100vh;
+            cursor: grab;
         }
 
         #biomeList {
@@ -112,6 +113,15 @@
         const sidebarWidth = 380;
         const canvas = document.getElementById("planetCanvas");
         const ctx = canvas.getContext("2d");
+
+        // For zoom and pan:
+        let scale = 1;
+        let offsetX = 0;
+        let offsetY = 0;
+
+        // Track dragging for pan
+        let isDragging = false;
+        let dragStartX, dragStartY;
 
         function updateCanvasSize() {
             const width = window.innerWidth - sidebarWidth;
@@ -286,6 +296,52 @@
 
         loadPlanetsData();
 
+        // Zoom with wheel
+        canvas.addEventListener("wheel", e => {
+            e.preventDefault();
+
+            // Get mouse position relative to canvas
+            const rect = canvas.getBoundingClientRect();
+            const mouseX = e.clientX - rect.left;
+            const mouseY = e.clientY - rect.top;
+
+            // Calculate world coords before zoom
+            const wx = (mouseX - offsetX) / scale;
+            const wy = (mouseY - offsetY) / scale;
+
+            // Zoom factor
+            const zoomAmount = e.deltaY < 0 ? 1.1 : 0.9;
+            scale *= zoomAmount;
+
+            // Clamp scale (min/max zoom)
+            scale = Math.min(Math.max(scale, 0.5), 10);
+
+            // After zoom, recalc offset to keep zoom centered on mouse
+            offsetX = mouseX - wx * scale;
+            offsetY = mouseY - wy * scale;
+
+            drawPlanets();
+        }, { passive: false });
+
+        // Pan with mouse drag
+        canvas.addEventListener("mousedown", e => {
+            isDragging = true;
+            dragStartX = e.clientX - offsetX;
+            dragStartY = e.clientY - offsetY;
+            canvas.style.cursor = "grabbing";
+        });
+        window.addEventListener("mouseup", e => {
+            isDragging = false;
+            canvas.style.cursor = "grab";
+        });
+        window.addEventListener("mousemove", e => {
+            if (isDragging) {
+                offsetX = e.clientX - dragStartX;
+                offsetY = e.clientY - dragStartY;
+                drawPlanets();
+            }
+        });
+
         canvas.addEventListener("mousemove", e => {
             const rect = canvas.getBoundingClientRect();
             const mouseX = e.clientX - rect.left;
@@ -296,13 +352,14 @@
             for (const planet of allPlanets) {
                 if (selectedBiome && planet.biome.name !== selectedBiome) continue;
 
-                const x = (planet.position.x + 1) / 2 * canvas.width;
-                const y = (1 - (planet.position.y + 1) / 2) * canvas.height;
+                // Calculate screen coords with zoom and pan
+                const x = ((planet.position.x + 1) / 2) * canvas.width * scale + offsetX;
+                const y = (1 - ((planet.position.y + 1) / 2)) * canvas.height * scale + offsetY;
 
                 const dx = mouseX - x;
                 const dy = mouseY - y;
 
-                if (Math.sqrt(dx * dx + dy * dy) <= planetRadius) {
+                if (Math.sqrt(dx * dx + dy * dy) <= planetRadius * scale) {
                     hoveredPlanet = planet;
                     break;
                 }
@@ -313,16 +370,21 @@
 
         function drawPlanets() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Draw background with scale and offset
+            ctx.save();
+            ctx.setTransform(scale, 0, 0, scale, offsetX, offsetY);
             ctx.drawImage(backgroundImg, 0, 0, canvas.width, canvas.height);
+            ctx.restore();
 
             allPlanets
                 .filter(planet => !selectedBiome || planet.biome.name === selectedBiome)
                 .forEach(planet => {
-                    const x = (planet.position.x + 1) / 2 * canvas.width;
-                    const y = (1 - (planet.position.y + 1) / 2) * canvas.height;
+                    const x = ((planet.position.x + 1) / 2) * canvas.width * scale + offsetX;
+                    const y = (1 - ((planet.position.y + 1) / 2)) * canvas.height * scale + offsetY;
 
                     ctx.beginPath();
-                    ctx.arc(x, y, planetRadius, 0, Math.PI * 2);
+                    ctx.arc(x, y, planetRadius * scale, 0, Math.PI * 2);
 
                     const isPlayable = playablePlanetsSet.has(planet.index);
                     ctx.fillStyle = isPlayable
@@ -332,9 +394,9 @@
                     ctx.fill();
 
                     ctx.fillStyle = isPlayable ? "white" : "#777";
-                    ctx.font = "12px Arial";
+                    ctx.font = `${12 * scale}px Arial`;
                     ctx.textBaseline = "alphabetic";
-                    ctx.fillText(planet.name, x + 10, y + 4);
+                    ctx.fillText(planet.name, x + 10 * scale, y + 4 * scale);
                 });
 
             if (hoveredPlanet) {
@@ -343,30 +405,30 @@
         }
 
         function drawPopup(planet) {
-            const x = (planet.position.x + 1) / 2 * canvas.width;
-            const y = (1 - (planet.position.y + 1) / 2) * canvas.height;
+            const x = ((planet.position.x + 1) / 2) * canvas.width * scale + offsetX;
+            const y = (1 - ((planet.position.y + 1) / 2)) * canvas.height * scale + offsetY;
 
-            const padding = 10;
-            const imgWidth = 140;
-            const imgHeight = 60;
+            const padding = 10 * scale;
+            const imgWidth = 140 * scale;
+            const imgHeight = 60 * scale;
 
-            const textHeight = 24;
+            const textHeight = 24 * scale;
             const boxWidth = imgWidth + padding * 2;
             const boxHeight = imgHeight + textHeight + padding * 2;
-            const radius = 10;
+            const radius = 10 * scale;
 
             ctx.fillStyle = "rgba(0, 122, 204, 0.8)";
-            roundRect(ctx, x + 15, y - boxHeight / 2, boxWidth, boxHeight, radius);
+            roundRect(ctx, x + 15 * scale, y - boxHeight / 2, boxWidth, boxHeight, radius);
             ctx.fill();
 
             ctx.fillStyle = "white";
-            ctx.font = "bold 16px Arial";
+            ctx.font = `bold ${16 * scale}px Arial`;
             ctx.textBaseline = "top";
-            ctx.fillText(planet.biome.name, x + 15 + padding, y - boxHeight / 2 + padding);
+            ctx.fillText(planet.biome.name, x + 15 * scale + padding, y - boxHeight / 2 + padding);
 
             const img = biomeImageCache.get(planet.biome.name);
             if (img && img.complete) {
-                ctx.drawImage(img, x + 15 + padding, y - boxHeight / 2 + padding + textHeight, imgWidth, imgHeight);
+                ctx.drawImage(img, x + 15 * scale + padding, y - boxHeight / 2 + padding + textHeight, imgWidth, imgHeight);
             }
         }
 
