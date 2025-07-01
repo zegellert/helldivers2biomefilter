@@ -4,6 +4,7 @@
 <head>
     <meta charset="UTF-8" />
     <title>Planets & Biomes</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
     <style>
         body {
             margin: 0;
@@ -13,6 +14,10 @@
             color: white;
             height: 100vh;
             overflow: hidden;
+            -webkit-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+            touch-action: none;
         }
 
         #planetCanvas {
@@ -22,6 +27,8 @@
             width: 100%;
             height: 100vh;
             cursor: grab;
+            touch-action: none;
+            -webkit-tap-highlight-color: transparent;
         }
 
         #biomeList {
@@ -74,7 +81,6 @@
             background-color: yellow;
         }
 
-        /* Hide all biome names by default */
         .biome .hover-name {
             position: absolute;
             bottom: 6px;
@@ -85,17 +91,14 @@
             pointer-events: none;
             user-select: none;
             display: none;
-            /* hide by default */
             text-shadow: 0 0 3px black;
             white-space: nowrap;
         }
 
-        /* Show name on hover for unselected */
         .biome:not(.selected):hover .hover-name {
             display: block;
         }
 
-        /* Always show on selected biome */
         .biome.selected .hover-name {
             display: block;
         }
@@ -108,18 +111,16 @@
     <div id="biomeList"></div>
 
     <script>
-        const devmode = true;
+        const devmode = false;
 
         const sidebarWidth = 380;
         const canvas = document.getElementById("planetCanvas");
         const ctx = canvas.getContext("2d");
 
-        // For zoom and pan:
         let scale = 1;
         let offsetX = 0;
         let offsetY = 0;
 
-        // Track dragging for pan
         let isDragging = false;
         let dragStartX, dragStartY;
 
@@ -160,7 +161,6 @@
             "Illuminate": "purple"
         };
 
-        // Load biomes.json and populate biome list
         fetch('biomes.json').then(r => r.json()).then(biomes => {
             const biomeList = document.getElementById("biomeList");
             biomes.sort((a, b) => b.hippos - a.hippos);
@@ -178,7 +178,6 @@
             defaultImgElem.title = "Show All Planets";
             defaultBtn.appendChild(defaultImgElem);
 
-            // Hover name label for default button
             const defaultHoverName = document.createElement("div");
             defaultHoverName.className = "hover-name";
             defaultHoverName.textContent = "All Biomes";
@@ -215,7 +214,6 @@
 
                 div.appendChild(imgElem);
 
-                // Hover name label
                 const hoverName = document.createElement("div");
                 hoverName.className = "hover-name";
                 hoverName.textContent = biome.name;
@@ -297,21 +295,12 @@
 
         loadPlanetsData();
 
-        // Clamp offset to boundaries with 500px margin
         function clampOffset() {
             if (!canvas.width || !canvas.height) return;
 
             const margin = 500;
-
-            // Map original size is canvas.width x canvas.height at scale=1
-            // Scaled size:
             const scaledWidth = canvas.width * scale;
             const scaledHeight = canvas.height * scale;
-
-            // Limits for offsetX:
-            // Max offsetX: margin (can pan right this far)
-            // Min offsetX: -(scaledWidth - canvas.width) - margin
-            // same for offsetY
 
             const minOffsetX = Math.min(margin, canvas.width - scaledWidth - margin);
             const maxOffsetX = Math.max(margin, margin);
@@ -319,15 +308,12 @@
             const minOffsetY = Math.min(margin, canvas.height - scaledHeight - margin);
             const maxOffsetY = Math.max(margin, margin);
 
-            // Clamp offsetX
             if (scaledWidth <= canvas.width) {
-                // If scaled map smaller than canvas, center it with margin limits
                 offsetX = Math.min(maxOffsetX, Math.max(minOffsetX, offsetX));
             } else {
                 offsetX = Math.min(margin, Math.max(canvas.width - scaledWidth - margin, offsetX));
             }
 
-            // Clamp offsetY
             if (scaledHeight <= canvas.height) {
                 offsetY = Math.min(maxOffsetY, Math.max(minOffsetY, offsetY));
             } else {
@@ -335,7 +321,6 @@
             }
         }
 
-        // Zoom with wheel
         canvas.addEventListener("wheel", e => {
             e.preventDefault();
 
@@ -359,7 +344,6 @@
             drawPlanets();
         }, { passive: false });
 
-        // Pan with mouse drag
         canvas.addEventListener("mousedown", e => {
             isDragging = true;
             dragStartX = e.clientX - offsetX;
@@ -404,10 +388,84 @@
             drawPlanets();
         });
 
+        let lastTouchDist = null;
+        let lastTouchCenter = null;
+        let isTouchPanning = false;
+
+        canvas.addEventListener("touchstart", e => {
+            if (e.touches.length === 1) {
+                isDragging = true;
+                dragStartX = e.touches[0].clientX - offsetX;
+                dragStartY = e.touches[0].clientY - offsetY;
+                isTouchPanning = true;
+            } else if (e.touches.length === 2) {
+                isDragging = false;
+                isTouchPanning = false;
+                lastTouchDist = getTouchDist(e.touches);
+                lastTouchCenter = getTouchCenter(e.touches);
+            }
+        }, { passive: false });
+
+        canvas.addEventListener("touchmove", e => {
+            e.preventDefault();
+            if (e.touches.length === 1 && isTouchPanning) {
+                offsetX = e.touches[0].clientX - dragStartX;
+                offsetY = e.touches[0].clientY - dragStartY;
+                clampOffset();
+                drawPlanets();
+            } else if (e.touches.length === 2) {
+                const newDist = getTouchDist(e.touches);
+                const newCenter = getTouchCenter(e.touches);
+
+                if (lastTouchDist && lastTouchCenter) {
+                    const zoomAmount = newDist / lastTouchDist;
+                    const newScale = Math.min(Math.max(scale * zoomAmount, 0.5), 10);
+
+                    const wx = (newCenter.x - offsetX) / scale;
+                    const wy = (newCenter.y - offsetY) / scale;
+
+                    scale = newScale;
+
+                    offsetX = newCenter.x - wx * scale;
+                    offsetY = newCenter.y - wy * scale;
+
+                    clampOffset();
+                    drawPlanets();
+                }
+
+                lastTouchDist = newDist;
+                lastTouchCenter = newCenter;
+                isTouchPanning = false;
+            }
+        }, { passive: false });
+
+        canvas.addEventListener("touchend", e => {
+            if (e.touches.length < 2) {
+                lastTouchDist = null;
+                lastTouchCenter = null;
+            }
+            if (e.touches.length === 0) {
+                isDragging = false;
+                isTouchPanning = false;
+            }
+        });
+
+        function getTouchDist(touches) {
+            const dx = touches[0].clientX - touches[1].clientX;
+            const dy = touches[0].clientY - touches[1].clientY;
+            return Math.sqrt(dx * dx + dy * dy);
+        }
+
+        function getTouchCenter(touches) {
+            return {
+                x: (touches[0].clientX + touches[1].clientX) / 2,
+                y: (touches[0].clientY + touches[1].clientY) / 2
+            };
+        }
+
         function drawPlanets() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            // Draw background with scale and offset
             ctx.save();
             ctx.setTransform(scale, 0, 0, scale, offsetX, offsetY);
             ctx.drawImage(backgroundImg, 0, 0, canvas.width, canvas.height);
