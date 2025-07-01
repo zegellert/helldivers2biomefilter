@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Planet Drawer</title>
+    <style>
+        canvas {
+            border: 1px solid black;
+            background-color: #000;
+        }
+    </style>
+</head>
+
+<body>
+    <canvas id="planetCanvas" width="2000" height="1600"></canvas>
+
+    <script>
+        const canvas = document.getElementById("planetCanvas");
+        canvas.height = window.innerHeight;
+
+        const ctx = canvas.getContext("2d");
+        const canvasWidth = canvas.width;
+        const canvasHeight = canvas.height;
+
+        fetch('planets.json')
+            .then(response => {
+                if (!response.ok) throw new Error("Failed to load planets.json");
+                return response.json();
+            })
+            .then(planets => {
+                planets.forEach(planet => {
+                    // Transform from [-1, 1] space → [0, canvas] space
+                    const x = (planet.position.x + 1) / 2 * canvasWidth;
+                    const y = (1 - (planet.position.y + 1) / 2) * canvasHeight;
+
+                    ctx.beginPath();
+                    ctx.arc(x, y, 8, 0, Math.PI * 2);
+                    ctx.fillStyle = planet.currentOwner === "Humans" ? "cyan" : "red";
+                    ctx.fill();
+
+                    ctx.fillStyle = "white";
+                    ctx.font = "12px Arial";
+                    ctx.fillText(planet.name, x + 10, y);
+                });
+            })
+            .catch(error => {
+                console.error("Error loading or drawing planets:", error);
+            });
+
+    </script>
+</body>
+
+</html>

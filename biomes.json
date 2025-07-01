@@ -1,0 +1,116 @@
+[
+  {
+    "name": "Desert Dunes",
+    "archetype": "Sandy",
+    "description": "A blazing-hot desert planet, its rocky mesas are the sole interruptions to the endless sea of dunes.",
+    "image": "images/desert_dunes.jpg"
+  },
+  {
+    "name": "Desert Cliffs",
+    "archetype": "Sandy",
+    "description": "A desert planet prone to unpredictable and dangerous sand twisters.",
+    "image": "images/desert_cliffs.jpg"
+  },
+  {
+    "name": "Acidic Badlands",
+    "archetype": "Sandy",
+    "description": "Dense, toxic fumes from deep within the planet's crust seep out of cracks in the earth and coat the ground in a sickly haze.",
+    "image": "images/acidic_badlands.jpg"
+  },
+  {
+    "name": "Rocky Canyons",
+    "archetype": "Sandy",
+    "description": "This arid, rocky biome covering this world has driven the evolution of exceptionally efficient water usage in its various organisms.",
+    "image": "images/rocky_canyons.jpg"
+  },
+  {
+    "name": "Moon",
+    "archetype": "Sandy",
+    "description": "A rocky, lonely moon with extremely valuable mineral deposits underneath the surface.",
+    "image": "images/moon.jpg"
+  },
+  {
+    "name": "Volcanic Jungle",
+    "archetype": "Primordial",
+    "description": "Abundant with life, this wet planet is covered in deep oceans, thick forests, and tall grasses.",
+    "image": "images/volcanic_jungle.jpg"
+  },
+  {
+    "name": "Deadlands",
+    "archetype": "Primordial",
+    "description": "The lifeless grey of this planet is interrupted only by the violet flowers that grow from strange, parasitic outcroppings.",
+    "image": "images/deadlands.jpg"
+  },
+  {
+    "name": "Ethereal Jungle",
+    "archetype": "Primordial",
+    "description": "This world teems with ethereal, boundless, and peculiar plant life that spreads silent and uninterrupted across its entire surface.",
+    "image": "images/ethereal_jungle.jpg"
+  },
+  {
+    "name": "Ionic Jungle",
+    "archetype": "Primordial",
+    "description": "The strange subversion of photosynthesis that sustains the oddly‑hued flora that flourishes on this planet remains an intriguing mystery to Super Earth's greatest exo‑biologists.",
+    "image": "images/ionic_jungle.jpg"
+  },
+  {
+    "name": "Supercolony",
+    "archetype": "Primordial",
+    "description": "Entirely unforeseeable mutations from the Termicide led to hyper‑accelerated bug growth on this planet, turning it into a Supercolony. It is corrupted beyond saving.",
+    "image": "images/supercolony.jpg"
+  },
+  {
+    "name": "Icy Glaciers",
+    "archetype": "Arctic",
+    "description": "Submerged in eternal winter, this world's frosty peaks glimmer in the light of its too‑distant star.",
+    "image": "images/icy_glaciers.jpg"
+  },
+  {
+    "name": "Boneyard",
+    "archetype": "Arctic",
+    "description": "Ice and moss‑covered rock can be found across most of the surface of this planet.",
+    "image": "images/boneyard.jpg"
+  },
+  {
+    "name": "Plains",
+    "archetype": "Moor",
+    "description": "Rocky outcroppings punctuate fields of tall grass in a planet dominated by misty highland terrain.",
+    "image": "images/plains.jpg"
+  },
+  {
+    "name": "Tundra",
+    "archetype": "Moor",
+    "description": "A perennially chilly climate has allowed short, colorful shrubs to flourish across this planet's surface.",
+    "image": "images/tundra.jpg"
+  },
+  {
+    "name": "Scorched Moor",
+    "archetype": "Moor",
+    "description": "Scorching temperatures, high winds, and low precipitation cause a near‑constant cycle of fires to sweep this planet, punctuated by short bursts of lush rebirth between infernos.",
+    "image": "images/scorched_moor.jpg"
+  },
+  {
+    "name": "Ionic Crimson",
+    "archetype": "Moor",
+    "description": "A crimson algae has propagated wildly across this entire planet, coating its rocky hills with a constant red that masks the spilt blood of the heroes who defend it from tyranny.",
+    "image": "images/ionic_crimson.jpg"
+  },
+  {
+    "name": "Basic Swamp",
+    "archetype": "Swamp",
+    "description": "Tall, gnarled trees flourish across the surface of this forested world. Sunlight filters past dangling vines, to the saturated undergrowth below.",
+    "image": "images/basic_swamp.jpg"
+  },
+  {
+    "name": "Haunted Swamp",
+    "archetype": "Swamp",
+    "description": "Squelching mud, twisting roots; the odor of rot and anarchy. A teeming, endless morass.",
+    "image": "images/haunted_swamp.jpg"
+  },
+  {
+    "name": "Super Earth Metropolis",
+    "archetype": "City",
+    "description": "The blinding beacon that illuminates the stars with the light of Democracy. The patriotic paradise for citizens who truly serve their Federation.",
+    "image": "images/super_earth_metropolis.jpg"
+  }
+]

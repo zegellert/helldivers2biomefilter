@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Planets & Biomes</title>
+  <style>
+    body {
+      margin: 0;
+      display: flex;
+      font-family: sans-serif;
+      background: #111;
+      color: white;
+    }
+
+    #planetCanvas {
+      width: 1600px;
+      height: 100vh;
+      background-color: #000;
+      display: block;
+    }
+
+    #biomeList {
+      height: 100vh;
+      width: 200px;
+      overflow-y: auto;
+      background-color: #222;
+      padding: 10px;
+      box-sizing: border-box;
+    }
+
+    .biome {
+      margin-bottom: 10px;
+      cursor: pointer;
+      opacity: 0.4;
+      transition: opacity 0.2s, border 0.2s;
+      border: 2px solid transparent;
+    }
+
+    .biome img {
+      width: 100%;
+      border-radius: 5px;
+    }
+
+    .biome.selected {
+      opacity: 1;
+      border-color: #0ff;
+    }
+  </style>
+</head>
+<body>
+
+<canvas id="planetCanvas" width="1600"></canvas>
+
+<div id="biomeList"></div>
+
+<script>
+  const canvas = document.getElementById("planetCanvas");
+  canvas.height = window.innerHeight;
+
+  const ctx = canvas.getContext("2d");
+  const canvasWidth = canvas.width;
+  const canvasHeight = canvas.height;
+
+  let allPlanets = [];
+  let selectedBiome = null;
+
+  // Load biomes and populate biomeList
+  fetch('biomes.json')
+    .then(res => res.json())
+    .then(biomes => {
+      const biomeList = document.getElementById("biomeList");
+
+      biomes.forEach(biome => {
+        const div = document.createElement("div");
+        div.className = "biome";
+        div.dataset.name = biome.name;
+
+        const img = document.createElement("img");
+        img.src = biome.image;
+        img.alt = biome.name;
+        img.title = biome.name;
+
+        div.appendChild(img);
+        biomeList.appendChild(div);
+
+        div.addEventListener("click", () => {
+          selectedBiome = biome.name;
+
+          document.querySelectorAll(".biome").forEach(el => el.classList.remove("selected"));
+          div.classList.add("selected");
+
+          drawPlanets();
+        });
+      });
+    });
+
+  // Load planets
+  fetch('planets.json')
+    .then(res => res.json())
+    .then(planets => {
+      allPlanets = planets;
+      drawPlanets();
+    });
+
+  function drawPlanets() {
+    ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+
+    allPlanets
+      .filter(planet => !selectedBiome || planet.biome.name === selectedBiome)
+      .forEach(planet => {
+        const x = (planet.position.x + 1) / 2 * canvasWidth;
+        const y = (1 - (planet.position.y + 1) / 2) * canvasHeight;
+
+        ctx.beginPath();
+        ctx.arc(x, y, 8, 0, Math.PI * 2);
+        ctx.fillStyle = planet.currentOwner === "Humans" ? "cyan" : "red";
+        ctx.fill();
+
+        ctx.fillStyle = "white";
+        ctx.font = "12px Arial";
+        ctx.fillText(planet.name, x + 10, y);
+      });
+  }
+</script>
+
+</body>
+</html>
