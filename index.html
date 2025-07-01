@@ -196,12 +196,8 @@
             biomeList.appendChild(defaultBtn);
 
             defaultBtn.addEventListener("click", () => {
-                if (selectedBiome === null) {
-                    hideUnplayable = !hideUnplayable;
-                } else {
-                    selectedBiome = null;
-                    hideUnplayable = false;
-                }
+                selectedBiome = null;
+                hideUnplayable = !hideUnplayable;
                 defaultHoverName.textContent = hideUnplayable ? "All Biomes (Only Playable Planets)":"All Biomes";
                 updateSelection(defaultBtn);
                 drawPlanets();
