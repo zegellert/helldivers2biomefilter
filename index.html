@@ -147,6 +147,7 @@
         let allPlanets = [];
         let playablePlanetsSet = new Set();
         let selectedBiome = null;
+        let hideUnplayable = false;
         const planetRadius = 8;
         let hoveredPlanet = null;
 
@@ -195,7 +196,11 @@
             biomeList.appendChild(defaultBtn);
 
             defaultBtn.addEventListener("click", () => {
-                selectedBiome = null;
+                if (selectedBiome === null) {
+                    hideUnplayable = !hideUnplayable;
+                } else {
+                    selectedBiome = null;
+                }
                 updateSelection(defaultBtn);
                 drawPlanets();
             });
@@ -241,9 +246,11 @@
                 biomeList.appendChild(div);
 
                 div.addEventListener("click", () => {
-                    selectedBiome = biome.name;
-                    updateSelection(div);
-                    drawPlanets();
+                    if (selectedBiome !== biome.name) {
+                        selectedBiome = biome.name;
+                        updateSelection(div);
+                        drawPlanets();
+                    }
                 });
             });
 
@@ -375,6 +382,7 @@
 
             for (const planet of allPlanets) {
                 if (selectedBiome && planet.biome.name !== selectedBiome) continue;
+                if (hideUnplayable && !playablePlanetsSet.has(planet.index)) continue;
 
                 const x = ((planet.position.x + 1) / 2) * canvas.width * scale + offsetX;
                 const y = (1 - ((planet.position.y + 1) / 2)) * canvas.height * scale + offsetY;
@@ -475,7 +483,11 @@
             ctx.restore();
 
             allPlanets
-                .filter(planet => !selectedBiome || planet.biome.name === selectedBiome)
+                .filter(planet => {
+                    if (selectedBiome && planet.biome.name !== selectedBiome) return false;
+                    if (hideUnplayable && !playablePlanetsSet.has(planet.index)) return false;
+                    return true;
+                })
                 .forEach(planet => {
                     const x = ((planet.position.x + 1) / 2) * canvas.width * scale + offsetX;
                     const y = (1 - ((planet.position.y + 1) / 2)) * canvas.height * scale + offsetY;
