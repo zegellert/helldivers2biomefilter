@@ -33,6 +33,7 @@
         }
 
         .biome {
+            position: relative;
             margin-bottom: 10px;
             cursor: pointer;
             opacity: 0.4;
@@ -51,6 +52,25 @@
         .biome.selected {
             opacity: 1;
             border-color: #0ff;
+        }
+
+        .hippo-dots {
+            position: absolute;
+            top: 6px;
+            right: 6px;
+            display: flex;
+            gap: 3px;
+        }
+
+        .hippo-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background-color: grey;
+        }
+
+        .hippo-dot.yellow {
+            background-color: yellow;
         }
     </style>
 </head>
@@ -101,18 +121,21 @@
         // Cache for biome images
         const biomeImageCache = new Map();
 
-        // Load biomes and preload images
+        // Load biomes and preload images, with hippos sorting and dots
         fetch('biomes.json')
             .then(res => res.json())
             .then(biomes => {
                 const biomeList = document.getElementById("biomeList");
+
+                // Sort biomes by hippos descending
+                biomes.sort((a, b) => b.hippos - a.hippos);
 
                 // Preload default image for "all biomes"
                 const defaultImg = new Image();
                 defaultImg.src = "images/default.jpg";
                 biomeImageCache.set("", defaultImg);
 
-                // Default button to show all planets
+                // Default button to show all planets (always first)
                 const defaultBtn = document.createElement("div");
                 defaultBtn.className = "biome selected";
                 defaultBtn.dataset.name = "";
@@ -121,6 +144,15 @@
                 defaultImgElem.alt = "All Biomes";
                 defaultImgElem.title = "Show All Planets";
                 defaultBtn.appendChild(defaultImgElem);
+
+                // Add hippo dots container with one grey dot for default
+                const defaultDots = document.createElement("div");
+                defaultDots.className = "hippo-dots";
+                const defaultDot = document.createElement("div");
+                defaultDot.className = "hippo-dot"; // grey by default
+                defaultDots.appendChild(defaultDot);
+                defaultBtn.appendChild(defaultDots);
+
                 biomeList.appendChild(defaultBtn);
 
                 defaultBtn.addEventListener("click", () => {
@@ -129,7 +161,7 @@
                     drawPlanets();
                 });
 
-                // Create biome buttons and preload images
+                // Create biome buttons with hippo dots and preload images
                 biomes.forEach(biome => {
                     const div = document.createElement("div");
                     div.className = "biome";
@@ -145,6 +177,27 @@
                     imgElem.title = biome.name;
 
                     div.appendChild(imgElem);
+
+                    // Create hippo dots container
+                    const dotsContainer = document.createElement("div");
+                    dotsContainer.className = "hippo-dots";
+
+                    if (biome.hippos > 0) {
+                        // Add one yellow dot per hippo (max 5 for UI sanity)
+                        const count = Math.min(biome.hippos, 5);
+                        for (let i = 0; i < count; i++) {
+                            const dot = document.createElement("div");
+                            dot.className = "hippo-dot yellow";
+                            dotsContainer.appendChild(dot);
+                        }
+                    } else {
+                        // Add a single grey dot if zero
+                        const dot = document.createElement("div");
+                        dot.className = "hippo-dot";
+                        dotsContainer.appendChild(dot);
+                    }
+
+                    div.appendChild(dotsContainer);
                     biomeList.appendChild(div);
 
                     div.addEventListener("click", () => {
@@ -172,7 +225,7 @@
             drawPlanets();
         });
 
-        // Owner colors map
+        // Owner colors map (faction names as requested)
         const ownerColors = {
             "Humans": "cyan",
             "Automaton": "red",
@@ -229,7 +282,7 @@
                     // Set baseline & font explicitly for planet names
                     ctx.fillStyle = isPlayable ? "white" : "#777";
                     ctx.font = "12px Arial";
-                    ctx.textBaseline = "alphabetic";  // << fix here
+                    ctx.textBaseline = "alphabetic";
                     ctx.fillText(planet.name, x + 10, y + 4);
                 });
 
@@ -257,7 +310,7 @@
 
             ctx.fillStyle = "white";
             ctx.font = "bold 16px Arial";
-            ctx.textBaseline = "top";  // popup text baseline
+            ctx.textBaseline = "top";
             ctx.fillText(planet.biome.name, x + 15 + padding, y - boxHeight / 2 + padding);
 
             const img = biomeImageCache.get(planet.biome.name);
@@ -265,7 +318,6 @@
                 ctx.drawImage(img, x + 15 + padding, y - boxHeight / 2 + padding + textHeight, imgWidth, imgHeight);
             }
         }
-
 
         // Helper function: draw rounded rect
         function roundRect(ctx, x, y, width, height, radius) {
