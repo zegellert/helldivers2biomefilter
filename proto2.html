@@ -156,6 +156,13 @@
             ctx.clearRect(0, 0, canvasWidth, canvasHeight);
             ctx.drawImage(backgroundImg, 0, 0, canvasWidth, canvasHeight);
 
+            const ownerColors = {
+                "Humans": "cyan",
+                "Automaton": "red",
+                "Terminids": "yellow",
+                "Illuminate": "purple"
+            };
+
             allPlanets
                 .filter(planet => !selectedBiome || planet.biome.name === selectedBiome)
                 .forEach(planet => {
@@ -165,18 +172,17 @@
                     ctx.beginPath();
                     ctx.arc(x, y, 8, 0, Math.PI * 2);
 
-                    if (playablePlanetsSet.has(planet.index)) {
-                        // Highlight playable planets by owner color
-                        ctx.fillStyle = planet.currentOwner === "Humans" ? "cyan" : "red";
+                    const isPlayable = playablePlanetsSet.has(planet.index);
+
+                    if (isPlayable) {
+                        ctx.fillStyle = ownerColors[planet.currentOwner] || "white";
                     } else {
-                        // Dim non-playable planets grey
                         ctx.fillStyle = "grey";
                     }
 
                     ctx.fill();
 
-                    // Text white for all, maybe dim text for non-playable too
-                    ctx.fillStyle = playablePlanetsSet.has(planet.index) ? "white" : "#777";
+                    ctx.fillStyle = isPlayable ? "white" : "#777";
                     ctx.font = "12px Arial";
                     ctx.fillText(planet.name, x + 10, y + 4);
                 });
