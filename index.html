@@ -40,13 +40,13 @@
             transition: opacity 0.2s, border 0.2s;
             border: 2px solid transparent;
             border-radius: 5px;
+            user-select: none;
         }
 
         .biome img {
             width: 100%;
             border-radius: 5px;
             display: block;
-            user-select: none;
         }
 
         .biome.selected {
@@ -71,6 +71,32 @@
 
         .hippo-dot.yellow {
             background-color: yellow;
+        }
+
+        /* Hide all biome names by default */
+        .biome .hover-name {
+            position: absolute;
+            bottom: 6px;
+            right: 8px;
+            color: yellow;
+            font-weight: bold;
+            font-size: 14px;
+            pointer-events: none;
+            user-select: none;
+            display: none;
+            /* hide by default */
+            text-shadow: 0 0 3px black;
+            white-space: nowrap;
+        }
+
+        /* Show name on hover for unselected */
+        .biome:not(.selected):hover .hover-name {
+            display: block;
+        }
+
+        /* Always show on selected biome */
+        .biome.selected .hover-name {
+            display: block;
         }
     </style>
 </head>
@@ -141,6 +167,12 @@
             defaultImgElem.title = "Show All Planets";
             defaultBtn.appendChild(defaultImgElem);
 
+            // Hover name label for default button
+            const defaultHoverName = document.createElement("div");
+            defaultHoverName.className = "hover-name";
+            defaultHoverName.textContent = "All Biomes";
+            defaultBtn.appendChild(defaultHoverName);
+
             const defaultDots = document.createElement("div");
             defaultDots.className = "hippo-dots";
             const defaultDot = document.createElement("div");
@@ -171,6 +203,12 @@
                 imgElem.title = biome.name;
 
                 div.appendChild(imgElem);
+
+                // Hover name label
+                const hoverName = document.createElement("div");
+                hoverName.className = "hover-name";
+                hoverName.textContent = biome.name;
+                div.appendChild(hoverName);
 
                 const dotsContainer = document.createElement("div");
                 dotsContainer.className = "hippo-dots";
@@ -204,7 +242,6 @@
             }
         });
 
-        // Load planets and playable planets depending on devmode
         async function loadPlanetsData() {
             if (devmode) {
                 try {
@@ -249,7 +286,6 @@
 
         loadPlanetsData();
 
-        // Mouse hover tracking
         canvas.addEventListener("mousemove", e => {
             const rect = canvas.getBoundingClientRect();
             const mouseX = e.clientX - rect.left;
