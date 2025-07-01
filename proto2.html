@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Planets & Biomes</title>
   <style>
     body {
@@ -10,18 +10,21 @@
       font-family: sans-serif;
       background: #111;
       color: white;
+      height: 100vh;
+      overflow: hidden;
     }
 
     #planetCanvas {
-      width: 1600px;
-      height: 100vh;
+      flex: 1 1 auto;
       background-color: #000;
       display: block;
+      width: 1000px;
+      height: 100vh;
     }
 
     #biomeList {
+      width: 400px;
       height: 100vh;
-      width: 200px;
       overflow-y: auto;
       background-color: #222;
       padding: 10px;
@@ -34,11 +37,14 @@
       opacity: 0.4;
       transition: opacity 0.2s, border 0.2s;
       border: 2px solid transparent;
+      border-radius: 5px;
     }
 
     .biome img {
       width: 100%;
       border-radius: 5px;
+      display: block;
+      user-select: none;
     }
 
     .biome.selected {
@@ -49,27 +55,43 @@
 </head>
 <body>
 
-<canvas id="planetCanvas" width="1600"></canvas>
-
+<canvas id="planetCanvas" width="2000"></canvas>
 <div id="biomeList"></div>
 
 <script>
   const canvas = document.getElementById("planetCanvas");
   canvas.height = window.innerHeight;
-
   const ctx = canvas.getContext("2d");
   const canvasWidth = canvas.width;
   const canvasHeight = canvas.height;
 
   let allPlanets = [];
-  let selectedBiome = null;
+  let selectedBiome = null; // null means show all planets
 
-  // Load biomes and populate biomeList
+  // Load biomes and setup biome list including default button
   fetch('biomes.json')
     .then(res => res.json())
     .then(biomes => {
       const biomeList = document.getElementById("biomeList");
 
+      // Default button to show all planets
+      const defaultBtn = document.createElement("div");
+      defaultBtn.className = "biome selected";
+      defaultBtn.dataset.name = "";
+      const defaultImg = document.createElement("img");
+      defaultImg.src = "images/default.jpg";
+      defaultImg.alt = "All Biomes";
+      defaultImg.title = "Show All Planets";
+      defaultBtn.appendChild(defaultImg);
+      biomeList.appendChild(defaultBtn);
+
+      defaultBtn.addEventListener("click", () => {
+        selectedBiome = null;
+        updateSelection(defaultBtn);
+        drawPlanets();
+      });
+
+      // Create biome buttons
       biomes.forEach(biome => {
         const div = document.createElement("div");
         div.className = "biome";
@@ -85,13 +107,17 @@
 
         div.addEventListener("click", () => {
           selectedBiome = biome.name;
-
-          document.querySelectorAll(".biome").forEach(el => el.classList.remove("selected"));
-          div.classList.add("selected");
-
+          updateSelection(div);
           drawPlanets();
         });
       });
+
+      function updateSelection(selectedDiv) {
+        document.querySelectorAll(".biome").forEach(el => {
+          el.classList.remove("selected");
+        });
+        selectedDiv.classList.add("selected");
+      }
     });
 
   // Load planets
@@ -108,6 +134,8 @@
     allPlanets
       .filter(planet => !selectedBiome || planet.biome.name === selectedBiome)
       .forEach(planet => {
+        // Map x,y from [-1..1] range assumed, position.x/y from your data is around [-1..1] or [-0.5..0.5]
+        // Adjust accordingly; here assuming position.x/y in approx [-1..1]
         const x = (planet.position.x + 1) / 2 * canvasWidth;
         const y = (1 - (planet.position.y + 1) / 2) * canvasHeight;
 
@@ -118,9 +146,15 @@
 
         ctx.fillStyle = "white";
         ctx.font = "12px Arial";
-        ctx.fillText(planet.name, x + 10, y);
+        ctx.fillText(planet.name, x + 10, y + 4);
       });
   }
+
+  // Resize canvas on window resize
+  window.addEventListener('resize', () => {
+    canvas.height = window.innerHeight;
+    drawPlanets();
+  });
 </script>
 
 </body>
