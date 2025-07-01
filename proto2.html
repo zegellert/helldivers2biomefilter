@@ -128,27 +128,34 @@
       drawPlanets();
     });
 
-  function drawPlanets() {
-    ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+  const backgroundImg = new Image();
+backgroundImg.src = 'images/sectors.png';
 
-    allPlanets
-      .filter(planet => !selectedBiome || planet.biome.name === selectedBiome)
-      .forEach(planet => {
-        // Map x,y from [-1..1] range assumed, position.x/y from your data is around [-1..1] or [-0.5..0.5]
-        // Adjust accordingly; here assuming position.x/y in approx [-1..1]
-        const x = (planet.position.x + 1) / 2 * canvasWidth;
-        const y = (1 - (planet.position.y + 1) / 2) * canvasHeight;
+backgroundImg.onload = () => {
+  drawPlanets();
+};
 
-        ctx.beginPath();
-        ctx.arc(x, y, 8, 0, Math.PI * 2);
-        ctx.fillStyle = planet.currentOwner === "Humans" ? "cyan" : "red";
-        ctx.fill();
+function drawPlanets() {
+  // Draw background stretched to fill the canvas
+  ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+  ctx.drawImage(backgroundImg, 0, 0, canvasWidth, canvasHeight);
 
-        ctx.fillStyle = "white";
-        ctx.font = "12px Arial";
-        ctx.fillText(planet.name, x + 10, y + 4);
-      });
-  }
+  allPlanets
+    .filter(planet => !selectedBiome || planet.biome.name === selectedBiome)
+    .forEach(planet => {
+      const x = (planet.position.x + 1) / 2 * canvasWidth;
+      const y = (1 - (planet.position.y + 1) / 2) * canvasHeight;
+
+      ctx.beginPath();
+      ctx.arc(x, y, 8, 0, Math.PI * 2);
+      ctx.fillStyle = planet.currentOwner === "Humans" ? "cyan" : "red";
+      ctx.fill();
+
+      ctx.fillStyle = "white";
+      ctx.font = "12px Arial";
+      ctx.fillText(planet.name, x + 10, y + 4);
+    });
+}
 
   // Resize canvas on window resize
   window.addEventListener('resize', () => {
