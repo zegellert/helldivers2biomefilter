@@ -147,7 +147,6 @@
         let allPlanets = [];
         let playablePlanetsSet = new Set();
         let selectedBiome = null;
-        let hideUnplayable = false;
         const planetRadius = 8;
         let hoveredPlanet = null;
 
@@ -163,6 +162,8 @@
             "Terminids": "yellow",
             "Illuminate": "purple"
         };
+
+        const hideUnplayableMap = new Map();
 
         fetch('biomes.json').then(r => r.json()).then(biomes => {
             const biomeList = document.getElementById("biomeList");
@@ -183,7 +184,6 @@
 
             const defaultHoverName = document.createElement("div");
             defaultHoverName.className = "hover-name";
-            defaultHoverName.textContent = "All Biomes";
             defaultBtn.appendChild(defaultHoverName);
 
             const defaultDots = document.createElement("div");
@@ -195,13 +195,35 @@
 
             biomeList.appendChild(defaultBtn);
 
+            hideUnplayableMap.set("", false);
+            biomes.forEach(b => hideUnplayableMap.set(b.name, false));
+
+            function updateHoverName(div, biomeName) {
+                const hide = hideUnplayableMap.get(biomeName);
+                const baseText = biomeName === "" ? "All Biomes" : biomeName;
+                div.querySelector(".hover-name").textContent = hide ? baseText + " (Only Playable Planets)" : baseText;
+            }
+
+            updateHoverName(defaultBtn, "");
+
             defaultBtn.addEventListener("click", () => {
-                selectedBiome = null;
-                hideUnplayable = !hideUnplayable;
-                defaultHoverName.textContent = hideUnplayable ? "All Biomes (Only Playable Planets)":"All Biomes";
-                updateSelection(defaultBtn);
-                drawPlanets();
+                const biomeName = "";
+                if (selectedBiome === null) {
+                    const current = hideUnplayableMap.get(biomeName);
+                    hideUnplayableMap.set(biomeName, !current);
+                    updateHoverName(defaultBtn, biomeName);
+                    drawPlanets();
+                } else {
+                    selectedBiome = null;
+                    updateSelection(defaultBtn);
+                    updateHoverName(defaultBtn, biomeName);
+                    document.querySelectorAll(".biome").forEach(el => {
+                        if (el !== defaultBtn) el.classList.remove("selected");
+                    });
+                    drawPlanets();
+                }
             });
+
 
             biomes.forEach(biome => {
                 const div = document.createElement("div");
@@ -221,7 +243,6 @@
 
                 const hoverName = document.createElement("div");
                 hoverName.className = "hover-name";
-                hoverName.textContent = biome.name;
                 div.appendChild(hoverName);
 
                 const dotsContainer = document.createElement("div");
@@ -243,11 +264,23 @@
                 div.appendChild(dotsContainer);
                 biomeList.appendChild(div);
 
+                updateHoverName(div, biome.name);
+
                 div.addEventListener("click", () => {
-                    if (selectedBiome !== biome.name) {
-                        selectedBiome = biome.name;
-                        hideUnplayable = false;
+                    const biomeName = biome.name;
+                    if (selectedBiome !== biomeName) {
+                        selectedBiome = biomeName;
                         updateSelection(div);
+                        updateHoverName(div, biomeName);
+                        defaultBtn.classList.remove("selected");
+                        document.querySelectorAll(".biome").forEach(el => {
+                            if (el !== div) el.classList.remove("selected");
+                        });
+                        drawPlanets();
+                    } else {
+                        const current = hideUnplayableMap.get(biomeName);
+                        hideUnplayableMap.set(biomeName, !current);
+                        updateHoverName(div, biomeName);
                         drawPlanets();
                     }
                 });
@@ -258,6 +291,7 @@
                 selectedDiv.classList.add("selected");
             }
         });
+
 
         async function loadPlanetsData() {
             if (devmode) {
@@ -381,6 +415,7 @@
 
             for (const planet of allPlanets) {
                 if (selectedBiome && planet.biome.name !== selectedBiome) continue;
+                const hideUnplayable = hideUnplayableMap.get(selectedBiome ?? "") ?? false;
                 if (hideUnplayable && !playablePlanetsSet.has(planet.index)) continue;
 
                 const x = ((planet.position.x + 1) / 2) * canvas.width * scale + offsetX;
@@ -480,6 +515,8 @@
             ctx.setTransform(scale, 0, 0, scale, offsetX, offsetY);
             ctx.drawImage(backgroundImg, 0, 0, canvas.width, canvas.height);
             ctx.restore();
+
+            const hideUnplayable = hideUnplayableMap.get(selectedBiome ?? "") ?? false;
 
             allPlanets
                 .filter(planet => {
