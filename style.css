@@ -1,0 +1,146 @@
+body {
+    margin: 0;
+    display: flex;
+    font-family: sans-serif;
+    background: #111;
+    color: white;
+    height: 100vh;
+    overflow: hidden;
+    -webkit-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    touch-action: none;
+}
+
+#planetCanvas {
+    flex: 1 1 auto;
+    background-color: #000;
+    display: block;
+    width: 100%;
+    height: 100vh;
+    cursor: grab;
+    touch-action: none;
+    -webkit-tap-highlight-color: transparent;
+}
+
+#biomeList {
+    width: 380px;
+    height: 100vh;
+    overflow-y: auto;
+    background-color: #222;
+    padding: 10px;
+    box-sizing: border-box;
+}
+
+.biome {
+    position: relative;
+    margin-bottom: 10px;
+    cursor: pointer;
+    opacity: 0.4;
+    transition: opacity 0.2s, border 0.2s;
+    border: 2px solid transparent;
+    border-radius: 5px;
+    user-select: none;
+}
+
+.biome img {
+    width: 100%;
+    border-radius: 5px;
+    display: block;
+}
+
+.biome.selected {
+    opacity: 1;
+    border-color: #0ff;
+}
+
+.hippo-dots {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    display: flex;
+    gap: 3px;
+}
+
+.hippo-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background-color: grey;
+}
+
+.hippo-dot.yellow {
+    background-color: yellow;
+}
+
+.biome .hover-name {
+    position: absolute;
+    bottom: 6px;
+    right: 8px;
+    color: yellow;
+    font-weight: bold;
+    font-size: 14px;
+    pointer-events: none;
+    user-select: none;
+    display: none;
+    text-shadow: 0 0 3px black;
+    white-space: nowrap;
+}
+
+.biome:not(.selected):hover .hover-name {
+    display: block;
+}
+
+.biome.selected .hover-name {
+    display: block;
+}
+
+.toggle-wrapper {
+    position: absolute;
+    top: 6px;
+    left: 6px;
+    display: flex;
+    align-items: center;
+    user-select: none;
+    pointer-events: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+}
+
+.toggle {
+    width: 32px;
+    height: 18px;
+    background-color: #888;
+    border-radius: 9px;
+    position: relative;
+    transition: background-color 0.3s ease;
+    flex-shrink: 0;
+}
+
+.toggle.on {
+    background-color: #f9d71c;
+    box-shadow: 0 0 6px 1px #f9d71c99;
+}
+
+.toggle-circle {
+    width: 14px;
+    height: 14px;
+    background-color: white;
+    border-radius: 50%;
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    transition: left 0.3s ease;
+    box-shadow: 0 0 4px rgba(0, 0, 0, 0.4);
+}
+
+.toggle.on .toggle-circle {
+    left: 16px;
+    background-color: #fff842;
+    box-shadow: 0 0 6px #f9d71c;
+}
+
+.toggle,
+.toggle-circle {
+    pointer-events: none;
+}
