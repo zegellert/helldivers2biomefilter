@@ -5,6 +5,7 @@
     <meta charset="UTF-8" />
     <title>Planets & Biomes</title>
     <style>
+        /* ... your existing CSS ... */
         body {
             margin: 0;
             display: flex;
@@ -85,7 +86,6 @@
         const canvas = document.getElementById("planetCanvas");
         const ctx = canvas.getContext("2d");
 
-        // Set canvas size to fill remaining width and full height
         function updateCanvasSize() {
             const width = window.innerWidth - sidebarWidth;
             const height = window.innerHeight;
@@ -104,128 +104,18 @@
         });
 
         let allPlanets = [];
-        let selectedBiome = null; // null means show all planets
-
         let playablePlanetsSet = new Set();
+        let selectedBiome = null;
+        const planetRadius = 8;
+        let hoveredPlanet = null;
 
         const backgroundImg = new Image();
         backgroundImg.src = 'images/sectors_upscaled_dimmed.png';
-        backgroundImg.onload = () => {
-            drawPlanets();
-        };
+        backgroundImg.onload = () => drawPlanets();
 
-        // Hover tracking
-        let hoveredPlanet = null;
-        const planetRadius = 8;
-
-        // Cache for biome images
         const biomeImageCache = new Map();
 
-        // Load biomes and preload images, with hippos sorting and dots
-        fetch('biomes.json')
-            .then(res => res.json())
-            .then(biomes => {
-                const biomeList = document.getElementById("biomeList");
-
-                // Sort biomes by hippos descending
-                biomes.sort((a, b) => b.hippos - a.hippos);
-
-                // Preload default image for "all biomes"
-                const defaultImg = new Image();
-                defaultImg.src = "images/default.jpg";
-                biomeImageCache.set("", defaultImg);
-
-                // Default button to show all planets (always first)
-                const defaultBtn = document.createElement("div");
-                defaultBtn.className = "biome selected";
-                defaultBtn.dataset.name = "";
-                const defaultImgElem = document.createElement("img");
-                defaultImgElem.src = "images/default.jpg";
-                defaultImgElem.alt = "All Biomes";
-                defaultImgElem.title = "Show All Planets";
-                defaultBtn.appendChild(defaultImgElem);
-
-                // Add hippo dots container with one grey dot for default
-                const defaultDots = document.createElement("div");
-                defaultDots.className = "hippo-dots";
-                const defaultDot = document.createElement("div");
-                defaultDot.className = "hippo-dot"; // grey by default
-                defaultDots.appendChild(defaultDot);
-                defaultBtn.appendChild(defaultDots);
-
-                biomeList.appendChild(defaultBtn);
-
-                defaultBtn.addEventListener("click", () => {
-                    selectedBiome = null;
-                    updateSelection(defaultBtn);
-                    drawPlanets();
-                });
-
-                // Create biome buttons with hippo dots and preload images
-                biomes.forEach(biome => {
-                    const div = document.createElement("div");
-                    div.className = "biome";
-                    div.dataset.name = biome.name;
-
-                    const img = new Image();
-                    img.src = biome.image;
-                    biomeImageCache.set(biome.name, img);
-
-                    const imgElem = document.createElement("img");
-                    imgElem.src = biome.image;
-                    imgElem.alt = biome.name;
-                    imgElem.title = biome.name;
-
-                    div.appendChild(imgElem);
-
-                    // Create hippo dots container
-                    const dotsContainer = document.createElement("div");
-                    dotsContainer.className = "hippo-dots";
-
-                    if (biome.hippos > 0) {
-                        // Add one yellow dot per hippo (max 5 for UI sanity)
-                        const count = Math.min(biome.hippos, 5);
-                        for (let i = 0; i < count; i++) {
-                            const dot = document.createElement("div");
-                            dot.className = "hippo-dot yellow";
-                            dotsContainer.appendChild(dot);
-                        }
-                    } else {
-                        // Add a single grey dot if zero
-                        const dot = document.createElement("div");
-                        dot.className = "hippo-dot";
-                        dotsContainer.appendChild(dot);
-                    }
-
-                    div.appendChild(dotsContainer);
-                    biomeList.appendChild(div);
-
-                    div.addEventListener("click", () => {
-                        selectedBiome = biome.name;
-                        updateSelection(div);
-                        drawPlanets();
-                    });
-                });
-
-                function updateSelection(selectedDiv) {
-                    document.querySelectorAll(".biome").forEach(el => {
-                        el.classList.remove("selected");
-                    });
-                    selectedDiv.classList.add("selected");
-                }
-            });
-
-        // Load planets and playable planets
-        Promise.all([
-            fetch('planets.json').then(res => res.json()),
-            fetch('playable_planets.json').then(res => res.json())
-        ]).then(([planets, playablePlanets]) => {
-            allPlanets = planets;
-            playablePlanetsSet = new Set(playablePlanets.map(p => p.planet.index));
-            drawPlanets();
-        });
-
-        // Owner colors map (faction names as requested)
+        // Owner colors, faction names fixed as requested
         const ownerColors = {
             "Humans": "cyan",
             "Automaton": "red",
@@ -233,7 +123,128 @@
             "Illuminate": "purple"
         };
 
-        // Mouse move to track hover planet
+        // Fetch biomes.json and populate biome list, preload images
+        fetch('biomes.json').then(r => r.json()).then(biomes => {
+            const biomeList = document.getElementById("biomeList");
+            biomes.sort((a, b) => b.hippos - a.hippos);
+
+            const defaultImg = new Image();
+            defaultImg.src = "images/default.jpg";
+            biomeImageCache.set("", defaultImg);
+
+            const defaultBtn = document.createElement("div");
+            defaultBtn.className = "biome selected";
+            defaultBtn.dataset.name = "";
+            const defaultImgElem = document.createElement("img");
+            defaultImgElem.src = "images/default.jpg";
+            defaultImgElem.alt = "All Biomes";
+            defaultImgElem.title = "Show All Planets";
+            defaultBtn.appendChild(defaultImgElem);
+
+            // Add grey hippo dot for default
+            const defaultDots = document.createElement("div");
+            defaultDots.className = "hippo-dots";
+            const defaultDot = document.createElement("div");
+            defaultDot.className = "hippo-dot";
+            defaultDots.appendChild(defaultDot);
+            defaultBtn.appendChild(defaultDots);
+
+            biomeList.appendChild(defaultBtn);
+
+            defaultBtn.addEventListener("click", () => {
+                selectedBiome = null;
+                updateSelection(defaultBtn);
+                drawPlanets();
+            });
+
+            biomes.forEach(biome => {
+                const div = document.createElement("div");
+                div.className = "biome";
+                div.dataset.name = biome.name;
+
+                const img = new Image();
+                img.src = biome.image;
+                biomeImageCache.set(biome.name, img);
+
+                const imgElem = document.createElement("img");
+                imgElem.src = biome.image;
+                imgElem.alt = biome.name;
+                imgElem.title = biome.name;
+
+                div.appendChild(imgElem);
+
+                const dotsContainer = document.createElement("div");
+                dotsContainer.className = "hippo-dots";
+
+                if (biome.hippos > 0) {
+                    const count = Math.min(biome.hippos, 5);
+                    for (let i = 0; i < count; i++) {
+                        const dot = document.createElement("div");
+                        dot.className = "hippo-dot yellow";
+                        dotsContainer.appendChild(dot);
+                    }
+                } else {
+                    const dot = document.createElement("div");
+                    dot.className = "hippo-dot";
+                    dotsContainer.appendChild(dot);
+                }
+
+                div.appendChild(dotsContainer);
+                biomeList.appendChild(div);
+
+                div.addEventListener("click", () => {
+                    selectedBiome = biome.name;
+                    updateSelection(div);
+                    drawPlanets();
+                });
+            });
+
+            function updateSelection(selectedDiv) {
+                document.querySelectorAll(".biome").forEach(el => el.classList.remove("selected"));
+                selectedDiv.classList.add("selected");
+            }
+        });
+
+        // Fetch planets and playable planets from API, then draw
+        async function loadPlanetsData() {
+            try {
+                // Fetch planets.json equivalent
+                const planetsResp = await fetch('https://api.helldivers2.dev/api/v1/planets', {
+                    headers: {
+                        'accept': 'application/json',
+                        'X-Super-Client': 'farmingmapper',
+                        'X-Super-Contact': 'farmingmapper'
+                    }
+                });
+                const planets = await planetsResp.json();
+
+                // Fetch playable_planets.json equivalent (campaigns)
+                const campaignsResp = await fetch('https://api.helldivers2.dev/api/v1/campaigns', {
+                    headers: {
+                        'accept': 'application/json',
+                        'X-Super-Client': 'farmingmapper',
+                        'X-Super-Contact': 'farmingmapper'
+                    }
+                });
+                const campaigns = await campaignsResp.json();
+
+                // Assign global
+                allPlanets = planets;
+
+                // Map playable planets indexes from campaigns data
+                // Assuming campaigns is an array with .planet objects as before
+                playablePlanetsSet = new Set(campaigns.map(c => c.planet.index));
+
+                drawPlanets();
+
+            } catch (e) {
+                console.error("Failed to load planets or campaigns data", e);
+            }
+        }
+
+        loadPlanetsData();
+
+        // Track hovered planet for popup
         canvas.addEventListener("mousemove", e => {
             const rect = canvas.getBoundingClientRect();
             const mouseX = e.clientX - rect.left;
@@ -279,7 +290,6 @@
 
                     ctx.fill();
 
-                    // Set baseline & font explicitly for planet names
                     ctx.fillStyle = isPlayable ? "white" : "#777";
                     ctx.font = "12px Arial";
                     ctx.textBaseline = "alphabetic";
@@ -319,7 +329,6 @@
             }
         }
 
-        // Helper function: draw rounded rect
         function roundRect(ctx, x, y, width, height, radius) {
             ctx.beginPath();
             ctx.moveTo(x + radius, y);
