@@ -137,6 +137,7 @@
         updateCanvasSize();
         window.addEventListener('resize', () => {
             updateCanvasSize();
+            clampOffset();
             drawPlanets();
         });
 
@@ -296,29 +297,64 @@
 
         loadPlanetsData();
 
+        // Clamp offset to boundaries with 500px margin
+        function clampOffset() {
+            if (!canvas.width || !canvas.height) return;
+
+            const margin = 500;
+
+            // Map original size is canvas.width x canvas.height at scale=1
+            // Scaled size:
+            const scaledWidth = canvas.width * scale;
+            const scaledHeight = canvas.height * scale;
+
+            // Limits for offsetX:
+            // Max offsetX: margin (can pan right this far)
+            // Min offsetX: -(scaledWidth - canvas.width) - margin
+            // same for offsetY
+
+            const minOffsetX = Math.min(margin, canvas.width - scaledWidth - margin);
+            const maxOffsetX = Math.max(margin, margin);
+
+            const minOffsetY = Math.min(margin, canvas.height - scaledHeight - margin);
+            const maxOffsetY = Math.max(margin, margin);
+
+            // Clamp offsetX
+            if (scaledWidth <= canvas.width) {
+                // If scaled map smaller than canvas, center it with margin limits
+                offsetX = Math.min(maxOffsetX, Math.max(minOffsetX, offsetX));
+            } else {
+                offsetX = Math.min(margin, Math.max(canvas.width - scaledWidth - margin, offsetX));
+            }
+
+            // Clamp offsetY
+            if (scaledHeight <= canvas.height) {
+                offsetY = Math.min(maxOffsetY, Math.max(minOffsetY, offsetY));
+            } else {
+                offsetY = Math.min(margin, Math.max(canvas.height - scaledHeight - margin, offsetY));
+            }
+        }
+
         // Zoom with wheel
         canvas.addEventListener("wheel", e => {
             e.preventDefault();
 
-            // Get mouse position relative to canvas
             const rect = canvas.getBoundingClientRect();
             const mouseX = e.clientX - rect.left;
             const mouseY = e.clientY - rect.top;
 
-            // Calculate world coords before zoom
             const wx = (mouseX - offsetX) / scale;
             const wy = (mouseY - offsetY) / scale;
 
-            // Zoom factor
             const zoomAmount = e.deltaY < 0 ? 1.1 : 0.9;
             scale *= zoomAmount;
 
-            // Clamp scale (min/max zoom)
             scale = Math.min(Math.max(scale, 0.5), 10);
 
-            // After zoom, recalc offset to keep zoom centered on mouse
             offsetX = mouseX - wx * scale;
             offsetY = mouseY - wy * scale;
+
+            clampOffset();
 
             drawPlanets();
         }, { passive: false });
@@ -338,6 +374,7 @@
             if (isDragging) {
                 offsetX = e.clientX - dragStartX;
                 offsetY = e.clientY - dragStartY;
+                clampOffset();
                 drawPlanets();
             }
         });
@@ -352,7 +389,6 @@
             for (const planet of allPlanets) {
                 if (selectedBiome && planet.biome.name !== selectedBiome) continue;
 
-                // Calculate screen coords with zoom and pan
                 const x = ((planet.position.x + 1) / 2) * canvas.width * scale + offsetX;
                 const y = (1 - ((planet.position.y + 1) / 2)) * canvas.height * scale + offsetY;
 
