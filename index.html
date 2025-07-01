@@ -267,11 +267,12 @@
                 }
             } else {
                 try {
+                    const randomId = Math.random().toString(36).substring(2, 10);
                     const planetsResp = await fetch('https://api.helldivers2.dev/api/v1/planets', {
                         headers: {
                             'accept': 'application/json',
-                            'X-Super-Client': 'biomemapper2',
-                            'X-Super-Contact': 'biomemapper2'
+                            'X-Super-Client': randomId,
+                            'X-Super-Contact': randomId
                         }
                     });
                     const planets = await planetsResp.json();
@@ -279,8 +280,8 @@
                     const campaignsResp = await fetch('https://api.helldivers2.dev/api/v1/campaigns', {
                         headers: {
                             'accept': 'application/json',
-                            'X-Super-Client': 'biomemapper2',
-                            'X-Super-Contact': 'biomemapper2'
+                            'X-Super-Client': randomId,
+                            'X-Super-Contact': randomId
                         }
                     });
                     const campaigns = await campaignsResp.json();
