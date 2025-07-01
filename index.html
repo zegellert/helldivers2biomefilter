@@ -6,7 +6,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <link rel="icon" href="images/favicon.ico" type="image/x-icon" />
     <title>Helldivers 2 Biome Mapper</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes" />
     <style>
         body {
             margin: 0;
@@ -106,12 +106,16 @@
         }
 
         .toggle-wrapper {
+            position: absolute;
+            top: 6px;
+            left: 6px;
+            display: flex;
+            align-items: center;
+            user-select: none;
             pointer-events: none;
             -webkit-user-select: none;
             -webkit-touch-callout: none;
-            touch-action: none;
         }
-
 
         .toggle {
             width: 32px;
@@ -144,6 +148,11 @@
             left: 16px;
             background-color: #fff842;
             box-shadow: 0 0 6px #f9d71c;
+        }
+
+        .toggle,
+        .toggle-circle {
+            pointer-events: none;
         }
     </style>
 </head>
@@ -599,7 +608,7 @@
         function getTouchCenter(touches) {
             return {
                 x: (touches[0].clientX + touches[1].clientX) / 2,
-                y: (e.touches[0].clientY + touches[1].clientY) / 2
+                y: (touches[0].clientY + touches[1].clientY) / 2
             };
         }
 
