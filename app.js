@@ -49,6 +49,7 @@ const ownerColors = {
 };
 
 const hideUnplayableMap = new Map();
+let hideUnplayable = false;
 
 fetch('biomes.json').then(r => r.json()).then(biomes => {
     const biomeList = document.getElementById("biomeList");
@@ -125,12 +126,14 @@ fetch('biomes.json').then(r => r.json()).then(biomes => {
 
     defaultBtn.addEventListener("click", () => {
         const biomeName = "";
+        // Re-click on All Biomes button
         if (selectedBiome === null) {
-            const current = hideUnplayableMap.get(biomeName);
-            hideUnplayableMap.set(biomeName, !current);
-            updateHoverName(defaultBtn, biomeName);
-            updateToggle(defaultBtn, biomeName);
-            drawPlanets();
+            // const current = hideUnplayableMap.get(biomeName);
+            // hideUnplayableMap.set(biomeName, !current);
+            // updateHoverName(defaultBtn, biomeName);
+            // updateToggle(defaultBtn, biomeName);
+            // drawPlanets();
+            // First click on All Biomes button
         } else {
             selectedBiome = null;
             updateSelection(defaultBtn);
@@ -213,7 +216,7 @@ fetch('biomes.json').then(r => r.json()).then(biomes => {
                 updateToggle(div, biomeName);
                 defaultBtn.classList.remove("selected"); // Remove selection visual
                 drawPlanets();
-            // Clicking on biome button again when selected
+                // Clicking on biome button again when selected
             } else {
                 const current = hideUnplayableMap.get(biomeName);
                 hideUnplayableMap.set(biomeName, !current);
@@ -463,8 +466,6 @@ function drawPlanets() {
     ctx.drawImage(backgroundImg, 0, 0, canvas.width, canvas.height);
     ctx.restore();
 
-    const hideUnplayable = hideUnplayableMap.get(selectedBiome ?? "") ?? false;
-
     allPlanets
         .filter(planet => {
             if (selectedBiome && planet.biome.name !== selectedBiome) return false;
@@ -551,43 +552,43 @@ hamburgerBtn.setAttribute("aria-expanded", "true");
 
 // Updates the canvas when hamburger button is pressed
 function updateCanvasRight() {
-  const isClosed = biomeList.classList.contains("closed");
-  const vw = window.innerWidth;
+    const isClosed = biomeList.classList.contains("closed");
+    const vw = window.innerWidth;
 
-  if (vw <= 480) {
-    // small screen
-    canvas.style.right = isClosed ? "0" : "80vw";
-  } else {
-    // desktop
-    canvas.style.right = isClosed ? "0" : "380px";
-  }
+    if (vw <= 480) {
+        // small screen
+        canvas.style.right = isClosed ? "0" : "80vw";
+    } else {
+        // desktop
+        canvas.style.right = isClosed ? "0" : "380px";
+    }
 }
 
 hamburgerBtn.addEventListener("click", () => {
-  biomeList.classList.toggle("closed");
-  hamburgerBtn.classList.toggle("closed");
+    biomeList.classList.toggle("closed");
+    hamburgerBtn.classList.toggle("closed");
 
-  const expanded = !biomeList.classList.contains("closed");
-  hamburgerBtn.setAttribute("aria-expanded", expanded ? "true" : "false");
+    const expanded = !biomeList.classList.contains("closed");
+    hamburgerBtn.setAttribute("aria-expanded", expanded ? "true" : "false");
 
-  // Update canvas CSS position (you already do this)
-  updateCanvasRight();
+    // Update canvas CSS position (you already do this)
+    updateCanvasRight();
 
-  // Update canvas pixel size based on biomeList state:
-  const vw = window.innerWidth;
-  const sidebarWidth = expanded
-    ? (vw <= 480 ? vw * 0.8 : 380)
-    : 0;
+    // Update canvas pixel size based on biomeList state:
+    const vw = window.innerWidth;
+    const sidebarWidth = expanded
+        ? (vw <= 480 ? vw * 0.8 : 380)
+        : 0;
 
-  // Resize canvas pixel size properly:
-  canvas.width = vw - sidebarWidth;
-  canvas.height = window.innerHeight;
-  canvas.style.width = (vw - sidebarWidth) + "px";
-  canvas.style.height = window.innerHeight + "px";
+    // Resize canvas pixel size properly:
+    canvas.width = vw - sidebarWidth;
+    canvas.height = window.innerHeight;
+    canvas.style.width = (vw - sidebarWidth) + "px";
+    canvas.style.height = window.innerHeight + "px";
 
-  // Re-draw to reflect size change:
-  clampOffset();
-  drawPlanets();
+    // Re-draw to reflect size change:
+    clampOffset();
+    drawPlanets();
 });
 
 
@@ -596,4 +597,14 @@ window.addEventListener("resize", updateCanvasRight);
 
 //#endregion
 
+//#region Hide Button
 
+const hideBtn = document.getElementById("hideBtn");
+
+hideBtn.addEventListener("click", () => {
+    hideUnplayable = !hideUnplayable;
+    console.log(hideUnplayable);
+    drawPlanets();
+});
+
+//#endregion
