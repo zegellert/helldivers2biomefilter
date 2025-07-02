@@ -264,6 +264,25 @@ body {
     border-radius: 2px;
 }
 
+#hideBtn.closed {
+    right: 10px;
+}
+
+#hideBtn .circle {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background-color: grey;
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+  pointer-events: none;
+  box-shadow: none;
+}
+
+#hideBtn.on .circle {
+  background-color: yellow;
+  box-shadow: 0 0 8px 2px #f9d71c99;
+}
+
 /* Responsive on small screens */
 @media (max-width: 480px) {
     #hamburgerBtn {

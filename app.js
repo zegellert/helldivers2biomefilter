@@ -51,6 +51,8 @@ const ownerColors = {
 const hideUnplayableMap = new Map();
 let hideUnplayable = false;
 
+const pinnedBiomesMap = new Map();
+
 fetch('biomes.json').then(r => r.json()).then(biomes => {
     const biomeList = document.getElementById("biomeList");
     biomes.sort((a, b) => b.hippos - a.hippos);
@@ -567,6 +569,7 @@ function updateCanvasRight() {
 hamburgerBtn.addEventListener("click", () => {
     biomeList.classList.toggle("closed");
     hamburgerBtn.classList.toggle("closed");
+    hideBtn.classList.toggle("closed");
 
     const expanded = !biomeList.classList.contains("closed");
     hamburgerBtn.setAttribute("aria-expanded", expanded ? "true" : "false");
@@ -603,7 +606,7 @@ const hideBtn = document.getElementById("hideBtn");
 
 hideBtn.addEventListener("click", () => {
     hideUnplayable = !hideUnplayable;
-    console.log(hideUnplayable);
+    hideBtn.classList.toggle("on");
     drawPlanets();
 });
 
