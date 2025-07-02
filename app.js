@@ -1,4 +1,4 @@
-const devmode = false;
+const devmode = true;
 
 const sidebarWidth = 380;
 const canvas = document.getElementById("planetCanvas");
@@ -483,15 +483,30 @@ function drawPlanets() {
             const x = ((planet.position.x + 1) / 2) * canvas.width * scale + offsetX;
             const y = (1 - ((planet.position.y + 1) / 2)) * canvas.height * scale + offsetY;
 
-            ctx.beginPath();
-            ctx.arc(x, y, planetRadius * scale, 0, Math.PI * 2);
-
+            const radius = planetRadius * scale;
             const isPlayable = playablePlanetsSet.has(planet.index);
-            ctx.fillStyle = isPlayable
-                ? (ownerColors[planet.currentOwner] || "white")
-                : "grey";
 
-            ctx.fill();
+            if (planet.currentOwner === "Humans" && planet.event?.faction) {
+                const factionColor = ownerColors[planet.event.faction] || "white";
+                console.log(factionColor)
+                const humansColor = ownerColors["Humans"] || "white";
+
+                  // Left half: 90° to 270°
+  drawHalfCirclePoly(x, y, radius, Math.PI / 2, (3 * Math.PI) / 2, factionColor);
+
+  // Right half: -90° to 90°
+  drawHalfCirclePoly(x, y, radius, -Math.PI / 2, Math.PI / 2, humansColor);
+
+            } else {
+                ctx.beginPath();
+                ctx.arc(x, y, planetRadius * scale, 0, Math.PI * 2);
+
+                ctx.fillStyle = isPlayable
+                    ? (ownerColors[planet.currentOwner] || "white")
+                    : "grey";
+
+                ctx.fill();
+            }
 
             ctx.fillStyle = isPlayable ? "white" : "#777";
             ctx.font = `${12 * scale}px Arial`;
@@ -515,8 +530,6 @@ function drawPopup(planet) {
     const sectorDiv = document.getElementById("sectorName");
     sectorDiv.style.display = "block";
     sectorDiv.querySelector("h1").innerText = planet.sector + " Sector";
-
-    console.log(planet)
 
     const x = ((planet.position.x + 1) / 2) * canvas.width * scale + offsetX;
     const y = (1 - ((planet.position.y + 1) / 2)) * canvas.height * scale + offsetY;
@@ -593,6 +606,22 @@ function roundRect(ctx, x, y, width, height, radius) {
     ctx.quadraticCurveTo(x, y, x + radius, y);
     ctx.closePath();
 }
+
+function drawHalfCirclePoly(cx, cy, radius, startAngle, endAngle, fillColor) {
+    const steps = 40; // number of segments to approximate half-circle
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    for (let i = 0; i <= steps; i++) {
+        let angle = startAngle + (endAngle - startAngle) * (i / steps);
+        let px = cx + Math.cos(angle) * radius;
+        let py = cy + Math.sin(angle) * radius;
+        ctx.lineTo(px, py);
+    }
+    ctx.closePath();
+    ctx.fillStyle = fillColor;
+    ctx.fill();
+}
+
 
 //#region Hamburger Button
 
