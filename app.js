@@ -1,4 +1,4 @@
-const devmode = true;
+const devmode = false;
 
 const sidebarWidth = 380;
 const canvas = document.getElementById("planetCanvas");
