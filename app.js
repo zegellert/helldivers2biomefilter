@@ -358,7 +358,9 @@ canvas.addEventListener("mousemove", e => {
     hoveredPlanet = null;
 
     for (const planet of allPlanets) {
-        if (selectedBiome && planet.biome.name !== selectedBiome) continue;
+        const isPinned = pinnedBiomesMap.get(planet.biome.name) === true;
+        if (selectedBiome && planet.biome.name !== selectedBiome && !isPinned) continue;
+
         const hideUnplayable = hideUnplayableMap.get(selectedBiome ?? "") ?? false;
         if (hideUnplayable && !playablePlanetsSet.has(planet.index)) continue;
 
@@ -510,8 +512,16 @@ function drawPopup(planet) {
     const imgHeight = 60 * scale;
 
     const textHeight = 24 * scale;
+    const lineHeight = 2 * scale;
+    const hazardLineHeight = 18 * scale; // height per hazard line
+    const extraSpaceUnderImage = 10 * scale; // space under image before hazards start
+
+    const hazardsCount = planet.hazards ? planet.hazards.length : 0;
+
     const boxWidth = imgWidth + padding * 2;
-    const boxHeight = imgHeight + textHeight + padding * 2;
+    // box height includes: two text lines + separator + image + space + hazards lines + padding top/bottom
+    const boxHeight = textHeight * 2 + lineHeight + imgHeight + extraSpaceUnderImage + hazardsCount * hazardLineHeight + padding * 2;
+
     const radius = 10 * scale;
 
     ctx.fillStyle = "rgba(0, 122, 204, 0.8)";
@@ -521,11 +531,38 @@ function drawPopup(planet) {
     ctx.fillStyle = "white";
     ctx.font = `bold ${16 * scale}px Arial`;
     ctx.textBaseline = "top";
-    ctx.fillText(planet.biome.name, x + 15 * scale + padding, y - boxHeight / 2 + padding);
 
+    // First line (planet.name)
+    ctx.fillText(planet.name, x + 15 * scale + padding, y - boxHeight / 2 + padding);
+
+    // Draw separator line
+    const lineY = y - boxHeight / 2 + padding + textHeight;
+    ctx.strokeStyle = "white";
+    ctx.lineWidth = lineHeight;
+    ctx.beginPath();
+    ctx.moveTo(x + 15 * scale + padding, lineY);
+    ctx.lineTo(x + 15 * scale + boxWidth - padding, lineY);
+    ctx.stroke();
+
+    // Second line (biome.name)
+    const biomeTextY = lineY + padding;
+    ctx.fillText(planet.biome.name, x + 15 * scale + padding, biomeTextY);
+
+    // Draw image below biome name
+    const imgY = biomeTextY + textHeight;
     const img = biomeImageCache.get(planet.biome.name);
     if (img && img.complete) {
-        ctx.drawImage(img, x + 15 * scale + padding, y - boxHeight / 2 + padding + textHeight, imgWidth, imgHeight);
+        ctx.drawImage(img, x + 15 * scale + padding, imgY, imgWidth, imgHeight);
+    }
+
+    // Draw hazards lines under image, with some space
+    if (hazardsCount > 0) {
+        ctx.font = `${14 * scale}px Arial`;
+        ctx.textBaseline = "top";
+        const hazardsStartY = imgY + imgHeight + extraSpaceUnderImage;
+        planet.hazards.forEach((hazard, idx) => {
+            ctx.fillText(`• ${hazard.name}`, x + 15 * scale + padding, hazardsStartY + idx * hazardLineHeight);
+        });
     }
 }
 
