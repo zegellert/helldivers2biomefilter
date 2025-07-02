@@ -91,12 +91,12 @@ fetch('biomes.json').then(r => r.json()).then(biomes => {
     defaultHoverName.className = "hover-name";
     defaultBtn.appendChild(defaultHoverName);
 
-    const defaultDots = document.createElement("div");
+    /* const defaultDots = document.createElement("div");
     defaultDots.className = "hippo-dots";
     const defaultDot = document.createElement("div");
     defaultDot.className = "hippo-dot";
     defaultDots.appendChild(defaultDot);
-    defaultBtn.appendChild(defaultDots);
+    defaultBtn.appendChild(defaultDots); */
 
     biomeList.appendChild(defaultBtn);
 
