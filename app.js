@@ -70,7 +70,7 @@ fetch('biomes.json').then(r => r.json()).then(biomes => {
     defaultImgElem.title = "Show All Planets";
     defaultBtn.appendChild(defaultImgElem);
 
-    const defaultToggleWrapper = document.createElement("div");
+    /* const defaultToggleWrapper = document.createElement("div");
     defaultToggleWrapper.className = "toggle-wrapper";
 
     const defaultToggle = document.createElement("div");
@@ -85,7 +85,7 @@ fetch('biomes.json').then(r => r.json()).then(biomes => {
     defaultUnplayableCircle.className = "unplayable-indicator";
     defaultToggleWrapper.appendChild(defaultUnplayableCircle);
 
-    defaultBtn.appendChild(defaultToggleWrapper);
+    defaultBtn.appendChild(defaultToggleWrapper); */
 
     const defaultHoverName = document.createElement("div");
     defaultHoverName.className = "hover-name";
@@ -220,6 +220,7 @@ fetch('biomes.json').then(r => r.json()).then(biomes => {
             } else {
                 const current = pinnedBiomesMap.get(biomeName);
                 pinnedBiomesMap.set(biomeName, !current);
+                div.classList.toggle("pinned");
                 updateHoverName(div, biomeName);
                 updateToggle(div, biomeName);
                 drawPlanets();

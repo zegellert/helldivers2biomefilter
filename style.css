@@ -101,6 +101,10 @@ body {
     display: block;
 }
 
+.biome.pinned .hover-name {
+    display: block;
+}
+
 .toggle-wrapper {
     position: absolute;
     top: 6px;
