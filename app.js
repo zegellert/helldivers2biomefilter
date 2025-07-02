@@ -491,11 +491,11 @@ function drawPlanets() {
                 console.log(factionColor)
                 const humansColor = ownerColors["Humans"] || "white";
 
-                  // Left half: 90° to 270°
-  drawHalfCirclePoly(x, y, radius, Math.PI / 2, (3 * Math.PI) / 2, factionColor);
+                // Left half: 90° to 270°
+                drawHalfCirclePoly(x, y, radius, Math.PI / 2, (3 * Math.PI) / 2, factionColor);
 
-  // Right half: -90° to 90°
-  drawHalfCirclePoly(x, y, radius, -Math.PI / 2, Math.PI / 2, humansColor);
+                // Right half: -90° to 90°
+                drawHalfCirclePoly(x, y, radius, -Math.PI / 2, Math.PI / 2, humansColor);
 
             } else {
                 ctx.beginPath();
