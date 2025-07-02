@@ -1,3 +1,18 @@
+@font-face {
+    font-family: 'SquaresBold';
+    src: url('fonts/SquaresBold.otf') format('opentype');
+    font-weight: bold;
+    font-style: normal;
+}
+
+.hover-name {
+    font-family: 'SquaresBold', sans-serif;
+}
+
+#sectorName {
+    font-family: 'SquaresBold', sans-serif;
+}
+
 body {
     margin: 0;
     display: flex;
@@ -286,6 +301,22 @@ body {
   background-color: yellow;
   box-shadow: 0 0 8px 2px #f9d71c99;
 }
+
+#sectorName {
+    position: fixed;
+    top: 10px;
+    left: 10px;
+    font-size: 28px;
+    color: white;
+    margin: 0;
+    padding: 0;
+    z-index: 1200;
+    font-weight: bold;
+    text-shadow: 0 0 6px #000;
+    pointer-events: none;
+    user-select: none;
+}
+
 
 /* Responsive on small screens */
 @media (max-width: 480px) {

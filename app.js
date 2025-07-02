@@ -36,7 +36,7 @@ const planetRadius = 8;
 let hoveredPlanet = null;
 
 const backgroundImg = new Image();
-backgroundImg.src = 'images/sectors_upscaled_dimmed.png';
+backgroundImg.src = 'images/sectors_upscaled_dimmed_nolabel.png';
 backgroundImg.onload = () => drawPlanets();
 
 const biomeImageCache = new Map();
@@ -502,9 +502,20 @@ function drawPlanets() {
     if (hoveredPlanet) {
         drawPopup(hoveredPlanet);
     }
+    else {
+        const sectorName = document.getElementById("sectorName");
+        sectorName.innerText = "";
+    }
 }
 
 function drawPopup(planet) {
+    if (hideUnplayable && !playablePlanetsSet.has(planet.index)) return false;
+
+    const sectorName = document.getElementById("sectorName");
+    sectorName.innerText = planet.sector;
+
+    console.log(planet)
+
     const x = ((planet.position.x + 1) / 2) * canvas.width * scale + offsetX;
     const y = (1 - ((planet.position.y + 1) / 2)) * canvas.height * scale + offsetY;
 
