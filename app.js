@@ -100,21 +100,21 @@ fetch('biomes.json').then(r => r.json()).then(biomes => {
 
     biomeList.appendChild(defaultBtn);
 
-    hideUnplayableMap.set("", false);
-    biomes.forEach(b => hideUnplayableMap.set(b.name, false));
+    pinnedBiomesMap.set("", false);
+    biomes.forEach(b => pinnedBiomesMap.set(b.name, false));
 
     function updateHoverName(div, biomeName) {
-        const hide = hideUnplayableMap.get(biomeName);
+        const pin = pinnedBiomesMap.get(biomeName);
         const baseText = biomeName === "" ? "All Biomes" : biomeName;
-        div.querySelector(".hover-name").textContent = hide ? baseText + " (Only Playable Planets)" : baseText;
+        div.querySelector(".hover-name").textContent = pin ? baseText + " (Pinned)" : baseText;
     }
 
     function updateToggle(div, biomeName) {
-        const hide = hideUnplayableMap.get(biomeName);
+        const pin = pinnedBiomesMap.get(biomeName);
         const toggle = div.querySelector(".toggle");
         if (!toggle) return;
 
-        if (hide) {
+        if (pin) {
             toggle.classList.add("on");
             toggle.classList.remove("off");
         } else {
@@ -128,15 +128,13 @@ fetch('biomes.json').then(r => r.json()).then(biomes => {
 
     defaultBtn.addEventListener("click", () => {
         const biomeName = "";
-        // Re-click on All Biomes button
-        if (selectedBiome === null) {
+        if (selectedBiome === null) { // Re-click on All Biomes button
             // const current = hideUnplayableMap.get(biomeName);
             // hideUnplayableMap.set(biomeName, !current);
             // updateHoverName(defaultBtn, biomeName);
             // updateToggle(defaultBtn, biomeName);
             // drawPlanets();
-            // First click on All Biomes button
-        } else {
+        } else { // First click on All Biomes button
             selectedBiome = null;
             updateSelection(defaultBtn);
             updateHoverName(defaultBtn, biomeName);
@@ -218,10 +216,10 @@ fetch('biomes.json').then(r => r.json()).then(biomes => {
                 updateToggle(div, biomeName);
                 defaultBtn.classList.remove("selected"); // Remove selection visual
                 drawPlanets();
-                // Clicking on biome button again when selected
+                // Re-clicking on biome button again when selected
             } else {
-                const current = hideUnplayableMap.get(biomeName);
-                hideUnplayableMap.set(biomeName, !current);
+                const current = pinnedBiomesMap.get(biomeName);
+                pinnedBiomesMap.set(biomeName, !current);
                 updateHoverName(div, biomeName);
                 updateToggle(div, biomeName);
                 drawPlanets();
@@ -468,12 +466,15 @@ function drawPlanets() {
     ctx.drawImage(backgroundImg, 0, 0, canvas.width, canvas.height);
     ctx.restore();
 
-    allPlanets
-        .filter(planet => {
-            if (selectedBiome && planet.biome.name !== selectedBiome) return false;
-            if (hideUnplayable && !playablePlanetsSet.has(planet.index)) return false;
+    allPlanets.filter(planet => {
+        if (hideUnplayable && !playablePlanetsSet.has(planet.index)) return false;
+        if (pinnedBiomesMap.get(planet.biome.name) === true) {
             return true;
-        })
+        }
+        if (selectedBiome && planet.biome.name !== selectedBiome) return false;
+        return true;
+    })
+
 
         .forEach(planet => {
             const x = ((planet.position.x + 1) / 2) * canvas.width * scale + offsetX;
