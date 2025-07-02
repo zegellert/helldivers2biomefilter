@@ -503,16 +503,18 @@ function drawPlanets() {
         drawPopup(hoveredPlanet);
     }
     else {
-        const sectorName = document.getElementById("sectorName");
-        sectorName.innerText = "";
+        const sectorDiv = document.getElementById("sectorName");
+        sectorDiv.style.display = "none";
+        sectorDiv.querySelector("h1").innerText = "";
     }
 }
 
 function drawPopup(planet) {
     if (hideUnplayable && !playablePlanetsSet.has(planet.index)) return false;
 
-    const sectorName = document.getElementById("sectorName");
-    sectorName.innerText = planet.sector;
+    const sectorDiv = document.getElementById("sectorName");
+    sectorDiv.style.display = "block";
+    sectorDiv.querySelector("h1").innerText = planet.sector + " Sector";
 
     console.log(planet)
 

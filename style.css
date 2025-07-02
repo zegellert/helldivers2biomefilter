@@ -306,17 +306,23 @@ body {
     position: fixed;
     top: 10px;
     left: 10px;
-    font-size: 28px;
-    color: white;
-    margin: 0;
-    padding: 0;
+    padding: 6px 12px;
+    border: 2px solid yellow;
+    border-radius: 6px;
+    background-color: rgba(0, 0, 0, 0.4);
+    font-family: 'SquaresBold', sans-serif;
     z-index: 1200;
-    font-weight: bold;
-    text-shadow: 0 0 6px #000;
     pointer-events: none;
     user-select: none;
 }
 
+#sectorName h1 {
+    margin: 0;
+    font-size: 20px;
+    color: white;
+    text-shadow: 0 0 3px black;
+    font-weight: normal;
+}
 
 /* Responsive on small screens */
 @media (max-width: 480px) {
