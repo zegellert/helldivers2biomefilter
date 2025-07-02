@@ -307,9 +307,9 @@ body {
     top: 10px;
     left: 10px;
     padding: 6px 12px;
-    border: 2px solid yellow;
+    border: 2px solid whitesmoke;
     border-radius: 6px;
-    background-color: rgba(0, 0, 0, 0.4);
+    background-color: rgba(0, 0, 0, 0.7);
     font-family: 'SquaresBold', sans-serif;
     z-index: 1200;
     pointer-events: none;
