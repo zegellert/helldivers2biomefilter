@@ -205,16 +205,15 @@ fetch('biomes.json').then(r => r.json()).then(biomes => {
 
         div.addEventListener("click", () => {
             const biomeName = biome.name;
+            // Clicking on biome button first, or from different biome
             if (selectedBiome !== biomeName) {
                 selectedBiome = biomeName;
                 updateSelection(div);
                 updateHoverName(div, biomeName);
                 updateToggle(div, biomeName);
-                defaultBtn.classList.remove("selected");
-                document.querySelectorAll(".biome").forEach(el => {
-                    if (el !== div) el.classList.remove("selected");
-                });
+                defaultBtn.classList.remove("selected"); // Remove selection visual
                 drawPlanets();
+            // Clicking on biome button again when selected
             } else {
                 const current = hideUnplayableMap.get(biomeName);
                 hideUnplayableMap.set(biomeName, !current);
@@ -225,6 +224,7 @@ fetch('biomes.json').then(r => r.json()).then(biomes => {
         });
     });
 
+    // Selected only controls the selection visual
     function updateSelection(selectedDiv) {
         document.querySelectorAll(".biome").forEach(el => el.classList.remove("selected"));
         selectedDiv.classList.add("selected");
@@ -303,6 +303,8 @@ function clampOffset() {
     }
 }
 
+//#region Mouse Controls
+
 canvas.addEventListener("wheel", e => {
     e.preventDefault();
 
@@ -371,6 +373,10 @@ canvas.addEventListener("mousemove", e => {
 
     drawPlanets();
 });
+
+//#endregion
+
+//#region Touch Controls
 
 let lastTouchDist = null;
 let lastTouchCenter = null;
@@ -446,6 +452,8 @@ function getTouchCenter(touches) {
         y: (touches[0].clientY + touches[1].clientY) / 2
     };
 }
+
+//#endregion
 
 function drawPlanets() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -531,7 +539,7 @@ function roundRect(ctx, x, y, width, height, radius) {
     ctx.closePath();
 }
 
-/*#######################################*/
+//#region Hamburger Button
 
 const hamburgerBtn = document.getElementById("hamburgerBtn");
 const biomeList = document.getElementById("biomeList");
@@ -541,6 +549,7 @@ biomeList.classList.remove("closed");
 hamburgerBtn.classList.remove("closed");
 hamburgerBtn.setAttribute("aria-expanded", "true");
 
+// Updates the canvas when hamburger button is pressed
 function updateCanvasRight() {
   const isClosed = biomeList.classList.contains("closed");
   const vw = window.innerWidth;
@@ -585,5 +594,6 @@ hamburgerBtn.addEventListener("click", () => {
 // Sync on window resize too
 window.addEventListener("resize", updateCanvasRight);
 
+//#endregion
 
 
