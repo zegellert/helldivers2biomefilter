@@ -466,6 +466,7 @@ function getTouchCenter(touches) {
 function drawPlanets() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+    // Draw map scaled and positioned
     ctx.save();
     ctx.setTransform(scale, 0, 0, scale, offsetX, offsetY);
     ctx.drawImage(backgroundImg, 0, 0, canvas.width, canvas.height);
@@ -473,57 +474,53 @@ function drawPlanets() {
 
     allPlanets.filter(planet => {
         if (hideUnplayable && !playablePlanetsSet.has(planet.index)) return false;
-        if (pinnedBiomesMap.get(planet.biome.name) === true) {
-            return true;
-        }
+        if (pinnedBiomesMap.get(planet.biome.name) === true) return true;
         if (selectedBiome && planet.biome.name !== selectedBiome) return false;
         return true;
     })
+    .forEach(planet => {
+        // Calculate planet position scaled and offset (same as map)
+        const x = ((planet.position.x + 1) / 2) * canvas.width * scale + offsetX;
+        const y = (1 - ((planet.position.y + 1) / 2)) * canvas.height * scale + offsetY;
 
+        // Draw planets with fixed size NOT affected by scale to prevent crowding
+        const fixedRadius = planetRadius; // fixed size regardless of zoom
+        const isPlayable = playablePlanetsSet.has(planet.index);
 
-        .forEach(planet => {
-            const x = ((planet.position.x + 1) / 2) * canvas.width * scale + offsetX;
-            const y = (1 - ((planet.position.y + 1) / 2)) * canvas.height * scale + offsetY;
+        if (planet.currentOwner === "Humans" && planet.event?.faction) {
+            const factionColor = ownerColors[planet.event.faction] || "white";
+            const humansColor = ownerColors["Humans"] || "white";
 
-            const radius = planetRadius * scale;
-            const isPlayable = playablePlanetsSet.has(planet.index);
+            // Use fixedRadius instead of scaled
+            drawHalfCirclePoly(x, y, fixedRadius, Math.PI / 2, (3 * Math.PI) / 2, factionColor);
+            drawHalfCirclePoly(x, y, fixedRadius, -Math.PI / 2, Math.PI / 2, humansColor);
+        } else {
+            ctx.beginPath();
+            ctx.arc(x, y, fixedRadius, 0, Math.PI * 2);
 
-            if (planet.currentOwner === "Humans" && planet.event?.faction) {
-                const factionColor = ownerColors[planet.event.faction] || "white";
-                const humansColor = ownerColors["Humans"] || "white";
+            ctx.fillStyle = isPlayable
+                ? (ownerColors[planet.currentOwner] || "white")
+                : "grey";
+            ctx.fill();
+        }
 
-                // Left half: 90° to 270°
-                drawHalfCirclePoly(x, y, radius, Math.PI / 2, (3 * Math.PI) / 2, factionColor);
-
-                // Right half: -90° to 90°
-                drawHalfCirclePoly(x, y, radius, -Math.PI / 2, Math.PI / 2, humansColor);
-
-            } else {
-                ctx.beginPath();
-                ctx.arc(x, y, planetRadius * scale, 0, Math.PI * 2);
-
-                ctx.fillStyle = isPlayable
-                    ? (ownerColors[planet.currentOwner] || "white")
-                    : "grey";
-
-                ctx.fill();
-            }
-
-            ctx.fillStyle = isPlayable ? "white" : "#777";
-            ctx.font = `${12 * scale}px Arial`;
-            ctx.textBaseline = "alphabetic";
-            ctx.fillText(planet.name, x + 10 * scale, y + 4 * scale);
-        });
+        // Draw text with fixed font size (or slightly scale with zoom but clamp)
+        ctx.fillStyle = isPlayable ? "white" : "#777";
+        const fontSize = Math.min(Math.max(12, 12 * scale), 16); // clamp between 12 and 16 px
+        ctx.font = `${fontSize}px Arial`;
+        ctx.textBaseline = "alphabetic";
+        ctx.fillText(planet.name, x + fixedRadius + 5, y + fontSize / 3);
+    });
 
     if (hoveredPlanet) {
         drawPopup(hoveredPlanet);
-    }
-    else {
+    } else {
         const sectorDiv = document.getElementById("sectorName");
         sectorDiv.style.display = "none";
         sectorDiv.querySelector("h1").innerText = "";
     }
 }
+
 
 function drawPopup(planet) {
     if (hideUnplayable && !playablePlanetsSet.has(planet.index)) return false;
