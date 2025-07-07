@@ -537,26 +537,23 @@ function drawPopup(planet) {
     const x = ((planet.position.x + 1) / 2) * canvas.width * scale + offsetX;
     const y = (1 - ((planet.position.y + 1) / 2)) * canvas.height * scale + offsetY;
 
-    const padding = 10 * scale;
+    const padding = 10;
 
-    const imgWidth = 260 * scale * 0.6667;  // one third less
-    const imgHeight = 60 * scale;
+    const imgWidth = 260 * 0.6667;
+    const imgHeight = 60;
 
-    const textHeight = 24 * scale;
-    const lineHeight = 2 * scale;
-    const hazardLineHeight = 18 * scale;
-    const extraSpaceUnderImage = 10 * scale;
+    const textHeight = 24;
+    const lineHeight = 2;
+    const hazardLineHeight = 18;
+    const extraSpaceUnderImage = 10;
 
     const hazardsCount = planet.hazards ? planet.hazards.length : 0;
 
     const boxWidth = imgWidth + padding * 2;
 
-
-    const nameLineHeight = 16 * scale;
-    const textMaxWidth = boxWidth - 2 * padding;
-
-    // Measure wrapped text height of planet.name (should not wrap now)
-    const wrappedTextHeight = measureWrappedText(ctx, planet.name, textMaxWidth, nameLineHeight);
+    const nameLineHeight = 16;
+    // No wrapping, so fixed height for the name line:
+    const wrappedTextHeight = nameLineHeight;
 
     const boxHeight =
         wrappedTextHeight +
@@ -567,12 +564,12 @@ function drawPopup(planet) {
         hazardsCount * hazardLineHeight +
         padding * 2;
 
-    const radius = 10 * scale;
+    const radius = 10;
 
     const topY = y - boxHeight / 2;
 
     ctx.fillStyle = "rgba(0, 122, 204, 0.8)";
-    roundRect(ctx, x + 15 * scale, topY, boxWidth, boxHeight, radius);
+    roundRect(ctx, x + 15, topY, boxWidth, boxHeight, radius);
     ctx.fill();
 
     ctx.fillStyle = "white";
@@ -581,7 +578,7 @@ function drawPopup(planet) {
 
     let currentY = topY + padding;
 
-    ctx.fillText(planet.name, x + 15 * scale + padding, currentY);
+    ctx.fillText(planet.name, x + 15 + padding, currentY);
 
     currentY += wrappedTextHeight;
 
@@ -589,28 +586,30 @@ function drawPopup(planet) {
     ctx.strokeStyle = "white";
     ctx.lineWidth = lineHeight;
     ctx.beginPath();
-    ctx.moveTo(x + 15 * scale + padding, currentY);
-    ctx.lineTo(x + 15 * scale + boxWidth - padding, currentY);
+    ctx.moveTo(x + 15 + padding, currentY);
+    ctx.lineTo(x + 15 + boxWidth - padding, currentY);
     ctx.stroke();
     currentY += lineHeight + padding / 2;
 
-    ctx.fillText(planet.biome.name, x + 15 * scale + padding, currentY);
+    ctx.fillText(planet.biome.name, x + 15 + padding, currentY);
     currentY += textHeight;
 
     const img = biomeImageCache.get(planet.biome.name);
     if (img && img.complete) {
-        ctx.drawImage(img, x + 15 * scale + padding, currentY, imgWidth, imgHeight);
+        ctx.drawImage(img, x + 15 + padding, currentY, imgWidth, imgHeight);
     }
     currentY += imgHeight + extraSpaceUnderImage;
 
     if (hazardsCount > 0) {
-        ctx.font = `${14 * scale}px Arial`;
+        ctx.font = `14px Arial`;
         ctx.textBaseline = "top";
         planet.hazards.forEach((hazard, idx) => {
-            ctx.fillText(`• ${hazard.name}`, x + 15 * scale + padding, currentY + idx * hazardLineHeight);
+            ctx.fillText(`• ${hazard.name}`, x + 15 + padding, currentY + idx * hazardLineHeight);
         });
     }
 }
+
+
 
 
 
