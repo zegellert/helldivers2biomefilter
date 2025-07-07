@@ -2,25 +2,54 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8" />
-    <link rel="manifest" href="manifest.json">
+  <meta charset="UTF-8" />
+  <link rel="manifest" href="manifest.json">
 
-    <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
 
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Biome Mapper">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Biome Mapper">
 
-    <link rel="apple-touch-icon" href="images/favicon.ico">
-    <link rel="icon" href="images/favicon.ico" type="image/x-icon" />
+  <link rel="apple-touch-icon" href="images/favicon.ico">
+  <link rel="icon" href="images/favicon.ico" type="image/x-icon" />
 
-    <title>Helldivers 2 Biome Mapper</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes" />
-    <link rel="stylesheet" href="style.css" />
+  <title>Helldivers 2 Biome Mapper</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes" />
+  <link rel="stylesheet" href="style.css" />
 </head>
 
 <body>
   <canvas id="planetCanvas"></canvas>
-  <div id="sectorName"><h1>Sector Name</h1></div>
+  <div id="sectorName">
+    <h1>Sector Name</h1>
+  </div>
+
+  <div id="overlay" class="hidden"></div>
+
+  <div id="dialogBox" class="hidden">
+    <button id="closeDialogBtn" aria-label="Close dialog">&times;</button>
+    <div class="dialog-content">
+      <h2>APPLICATION USER MANUAL FOR PROSPECTIVE HELLDIVERS</h2>
+      <p>Refresh the app manually to fetch live data for budgetary reasons.</p>
+      <p>Hover over planets to see their name, biome, sector, and dangers.</p>
+      <p>You can hide unplayable planets with the planet button.</p>
+      <button class="mock-hideBtn">
+        <span class="circle"></span>
+      </button>
+      <p>Click on a biome to filter to the planets of that biome.</p>
+      <p>You can pin a biome to always show with the radio button.</p>
+      <button class="mock-toggle" aria-pressed="false" aria-label="Mock Toggle"></button>
+      <p>The yellow dots indicate how lucrative a biome is for points of interest.</p>
+      <div class="mock-hippo-buttons">
+        <button class="mock-hippo-dot" aria-label="Mock Yellow Hippo 1"></button>
+        <button class="mock-hippo-dot" aria-label="Mock Yellow Hippo 2"></button>
+        <button class="mock-hippo-dot" aria-label="Mock Yellow Hippo 3"></button>
+      </div>
+      <p>The existence of low yield biomes implies the existence of high yield biomes, and we can take some solace in that.</p>
+    </div>
+
+  </div>
+  </div>
 
   <button id="hamburgerBtn" aria-label="Toggle Biome Menu" aria-expanded="true">
     <span></span>
@@ -30,6 +59,10 @@
 
   <button id="hideBtn" class="on">
     <span class="circle"></span>
+  </button>
+
+  <button id="dialogBtn">
+    <span>?</span>
   </button>
 
   <div id="biomeList"></div>

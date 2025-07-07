@@ -1,4 +1,4 @@
-const devmode = false;
+const devmode = true;
 
 const sidebarWidth = 380;
 const canvas = document.getElementById("planetCanvas");
@@ -651,6 +651,7 @@ hamburgerBtn.addEventListener("click", () => {
     biomeList.classList.toggle("closed");
     hamburgerBtn.classList.toggle("closed");
     hideBtn.classList.toggle("closed");
+    dialogBtn.classList.toggle("closed");
 
     const expanded = !biomeList.classList.contains("closed");
     hamburgerBtn.setAttribute("aria-expanded", expanded ? "true" : "false");
@@ -692,3 +693,48 @@ hideBtn.addEventListener("click", () => {
 });
 
 //#endregion
+
+//#region Tutorial Button
+
+const dialogBtn = document.getElementById('dialogBtn');
+const closeDialogBtn = document.getElementById('closeDialogBtn');
+const overlay = document.getElementById('overlay');
+const dialogBox = document.getElementById('dialogBox');
+
+dialogBtn.addEventListener('click', () => {
+    overlay.classList.add('visible');
+    dialogBox.classList.add('visible');
+});
+
+closeDialogBtn.addEventListener('click', () => {
+    overlay.classList.remove('visible');
+    dialogBox.classList.remove('visible');
+});
+
+overlay.addEventListener('click', () => {
+    overlay.classList.remove('visible');
+    dialogBox.classList.remove('visible');
+});
+
+//#endregion
+
+// #region Mocks
+
+document.querySelectorAll(".mock-hideBtn").forEach(btn => {
+    btn.addEventListener("click", () => {
+        btn.classList.toggle("on");
+    });
+});
+
+const mockToggle = document.querySelector('.mock-toggle');
+mockToggle.addEventListener('click', () => {
+    mockToggle.classList.toggle('on');
+    // update aria-pressed attribute for accessibility
+    const isOn = mockToggle.classList.contains('on');
+    mockToggle.setAttribute('aria-pressed', isOn ? 'true' : 'false');
+});
+
+
+
+
+// #endregion

@@ -28,19 +28,20 @@ body {
 }
 
 #planetCanvas {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 380px; /* reserve space for biomeList */
-  bottom: 0;
-  background-color: #000;
-  cursor: grab;
-  user-select: none;
-  z-index: 0;
-  width: auto;
-  height: 100vh;
-  -webkit-tap-highlight-color: transparent;
-  transition: right 0.3s ease;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 380px;
+    /* reserve space for biomeList */
+    bottom: 0;
+    background-color: #000;
+    cursor: grab;
+    user-select: none;
+    z-index: 0;
+    width: auto;
+    height: 100vh;
+    -webkit-tap-highlight-color: transparent;
+    transition: right 0.3s ease;
 }
 
 
@@ -170,7 +171,7 @@ body {
     pointer-events: none;
 }
 
-/*###############################################*/
+/* #region Hamburger button */
 
 /* Hamburger button fixed top-right offset to the left of biomeList */
 #hamburgerBtn {
@@ -253,10 +254,16 @@ body {
     right: 10px;
 }
 
+/* #endregion */
+
+/* #region Hide unplayable planets button */
+
 #hideBtn {
     position: fixed;
-    top: 50px;  /* Below hamburgerBtn (which is 10px + 32px height + 8px margin) */
-    right: 390px; /* same as hamburgerBtn */
+    top: 50px;
+    /* Below hamburgerBtn (which is 10px + 32px height + 8px margin) */
+    right: 390px;
+    /* same as hamburgerBtn */
     width: 32px;
     height: 32px;
     background: #444;
@@ -288,19 +295,21 @@ body {
 }
 
 #hideBtn .circle {
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
-  background-color: grey;
-  transition: background-color 0.3s ease, box-shadow 0.3s ease;
-  pointer-events: none;
-  box-shadow: none;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background-color: grey;
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+    pointer-events: none;
+    box-shadow: none;
 }
 
 #hideBtn.on .circle {
-  background-color: yellow;
-  box-shadow: 0 0 8px 2px #f9d71c99;
+    background-color: yellow;
+    box-shadow: 0 0 8px 2px #f9d71c99;
 }
+
+/* #endregion */
 
 #sectorName {
     position: fixed;
@@ -323,6 +332,221 @@ body {
     text-shadow: 0 0 3px black;
     font-weight: normal;
 }
+
+/* #region Tutorial dialog */
+/* Overlay */
+#dialogBtn {
+    position: fixed;
+    top: 90px;
+    /* below the other two */
+    right: 390px;
+    width: 32px;
+    height: 32px;
+    background: #444;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    font-size: 18px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1100;
+    transition: right 0.3s;
+    font-family: 'SquaresBold';
+}
+
+#dialogBtn.closed {
+    right: 10px;
+}
+
+#overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.7);
+    z-index: 2000;
+}
+
+#dialogBox {
+    position: fixed;
+    inset: 0;
+    margin: auto;
+    width: 90%;
+    max-width: 400px;
+    height: fit-content;
+
+    opacity: 0;
+    pointer-events: none;
+    background: #333;
+    color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    z-index: 2100;
+    box-shadow: 0 0 10px #000;
+    font-family: 'SquaresBold';
+
+    transform: scale(0.95);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+#dialogBox.visible {
+    opacity: 1;
+    pointer-events: auto;
+    transform: scale(1);
+}
+
+/* Close button */
+#closeDialogBtn {
+    position: absolute;
+    top: 8px;
+    right: 10px;
+    background: none;
+    border: none;
+    color: #fff;
+    font-size: 24px;
+    cursor: pointer;
+}
+
+.dialog-content {
+    display: flex;
+    flex-direction: column;
+}
+
+/* Dialog content */
+.dialog-content h2 {
+    margin-top: 0;
+    font-size: 20px;
+    margin-bottom: 10px;
+}
+
+.dialog-content p {
+    font-size: 14px;
+}
+
+/* Hidden utility class */
+/* .hidden {
+  display: none;
+} */
+
+/* Base hidden state */
+#overlay,
+#dialogBox {
+    opacity: 0;
+    pointer-events: none;
+    transform: scale(0.95);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+/* Visible state */
+#overlay.visible,
+#dialogBox.visible {
+    opacity: 1;
+    pointer-events: auto;
+    transform: scale(1);
+}
+
+/* #endregion */
+
+/* #region: Mocks */
+
+.mock-hideBtn {
+    width: 32px;
+    height: 32px;
+    background: #444;
+    border: none;
+    border-radius: 4px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    cursor: default;
+    user-select: none;
+    -webkit-user-select: none;
+    transition: background-color 0.3s;
+}
+
+.mock-hideBtn .circle {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background-color: grey;
+    transition: background-color 0.3s, box-shadow 0.3s;
+    box-shadow: none;
+}
+
+/* Optional 'on' style */
+.mock-hideBtn.on .circle {
+    background-color: #ff0;
+    box-shadow: 0 0 8px 2px #f9d71c99;
+}
+
+.mock-hippo-buttons {
+    display: flex;
+    gap: 8px;
+    /* spacing between dots */
+    align-items: center;
+    justify-content: center;
+}
+
+.mock-hippo-dot {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background-color: #ff0;
+    /* bright yellow */
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 0 6px 1px #f9d71c99;
+    transition: background-color 0.3s, box-shadow 0.3s;
+    padding: 0;
+    margin: 0;
+}
+
+.mock-hippo-dot:hover {
+    background-color: #fff842;
+    box-shadow: 0 0 8px 2px #f9d71c;
+}
+
+.mock-toggle {
+    width: 32px;
+    height: 18px;
+    background-color: #888;
+    border-radius: 9px;
+    position: relative;
+    cursor: pointer;
+    border: none;
+    user-select: none;
+    transition: background-color 0.3s;
+}
+
+.mock-toggle::before {
+    content: "";
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 14px;
+    height: 14px;
+    background-color: #fff;
+    border-radius: 50%;
+    box-shadow: 0 0 4px rgba(0, 0, 0, 0.4);
+    transition: left 0.3s, background-color 0.3s, box-shadow 0.3s;
+}
+
+.mock-toggle.on {
+    background-color: #f9d71c;
+    box-shadow: 0 0 6px 1px #f9d71c99;
+}
+
+.mock-toggle.on::before {
+    left: 16px;
+    background-color: #fff842;
+    box-shadow: 0 0 6px #f9d71c;
+}
+
+/* #endregion */
 
 /* Responsive on small screens */
 @media (max-width: 480px) {
