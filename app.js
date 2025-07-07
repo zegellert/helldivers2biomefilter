@@ -466,7 +466,7 @@ function getTouchCenter(touches) {
 function drawPlanets() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // Draw map scaled and positioned
+    // Draw background map scaled & translated
     ctx.save();
     ctx.setTransform(scale, 0, 0, scale, offsetX, offsetY);
     ctx.drawImage(backgroundImg, 0, 0, canvas.width, canvas.height);
@@ -477,39 +477,43 @@ function drawPlanets() {
         if (pinnedBiomesMap.get(planet.biome.name) === true) return true;
         if (selectedBiome && planet.biome.name !== selectedBiome) return false;
         return true;
-    })
-    .forEach(planet => {
-        // Calculate planet position scaled and offset (same as map)
+    }).forEach(planet => {
+        // Position follows map zoom/pan
         const x = ((planet.position.x + 1) / 2) * canvas.width * scale + offsetX;
         const y = (1 - ((planet.position.y + 1) / 2)) * canvas.height * scale + offsetY;
 
-        // Draw planets with fixed size NOT affected by scale to prevent crowding
-        const fixedRadius = planetRadius; // fixed size regardless of zoom
+        // Scale radius with zoom, clamp between min and max size
+        const minRadius = planetRadius * 0.5;  // smallest size zoomed out
+        const maxRadius = planetRadius * 1.5;  // largest size zoomed in
+        let radius = planetRadius * scale;
+        radius = Math.min(Math.max(radius, minRadius), maxRadius);
+
         const isPlayable = playablePlanetsSet.has(planet.index);
 
         if (planet.currentOwner === "Humans" && planet.event?.faction) {
             const factionColor = ownerColors[planet.event.faction] || "white";
             const humansColor = ownerColors["Humans"] || "white";
 
-            // Use fixedRadius instead of scaled
-            drawHalfCirclePoly(x, y, fixedRadius, Math.PI / 2, (3 * Math.PI) / 2, factionColor);
-            drawHalfCirclePoly(x, y, fixedRadius, -Math.PI / 2, Math.PI / 2, humansColor);
+            drawHalfCirclePoly(x, y, radius, Math.PI / 2, (3 * Math.PI) / 2, factionColor);
+            drawHalfCirclePoly(x, y, radius, -Math.PI / 2, Math.PI / 2, humansColor);
         } else {
             ctx.beginPath();
-            ctx.arc(x, y, fixedRadius, 0, Math.PI * 2);
+            ctx.arc(x, y, radius, 0, Math.PI * 2);
 
-            ctx.fillStyle = isPlayable
-                ? (ownerColors[planet.currentOwner] || "white")
-                : "grey";
+            ctx.fillStyle = isPlayable ? (ownerColors[planet.currentOwner] || "white") : "grey";
             ctx.fill();
         }
 
-        // Draw text with fixed font size (or slightly scale with zoom but clamp)
+        // Font size scales with zoom but clamped for readability
+        const minFontSize = 10;
+        const maxFontSize = 16;
+        let fontSize = 12 * scale;
+        fontSize = Math.min(Math.max(fontSize, minFontSize), maxFontSize);
+
         ctx.fillStyle = isPlayable ? "white" : "#777";
-        const fontSize = Math.min(Math.max(12, 12 * scale), 16); // clamp between 12 and 16 px
         ctx.font = `${fontSize}px Arial`;
         ctx.textBaseline = "alphabetic";
-        ctx.fillText(planet.name, x + fixedRadius + 5, y + fontSize / 3);
+        ctx.fillText(planet.name, x + radius + 5, y + fontSize / 3);
     });
 
     if (hoveredPlanet) {
@@ -520,6 +524,7 @@ function drawPlanets() {
         sectorDiv.querySelector("h1").innerText = "";
     }
 }
+
 
 
 function drawPopup(planet) {
