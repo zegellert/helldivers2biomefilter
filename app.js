@@ -459,7 +459,9 @@ function getTouchCenter(touches) {
     };
 }
 
-//#endregion
+// #endregion
+
+// #region Main drawing functions
 
 function drawPlanets() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -488,7 +490,6 @@ function drawPlanets() {
 
             if (planet.currentOwner === "Humans" && planet.event?.faction) {
                 const factionColor = ownerColors[planet.event.faction] || "white";
-                console.log(factionColor)
                 const humansColor = ownerColors["Humans"] || "white";
 
                 // Left half: 90° to 270°
@@ -535,63 +536,136 @@ function drawPopup(planet) {
     const y = (1 - ((planet.position.y + 1) / 2)) * canvas.height * scale + offsetY;
 
     const padding = 10 * scale;
-    const imgWidth = 140 * scale;
+
+    const imgWidth = 260 * scale * 0.6667;  // one third less
     const imgHeight = 60 * scale;
 
     const textHeight = 24 * scale;
     const lineHeight = 2 * scale;
-    const hazardLineHeight = 18 * scale; // height per hazard line
-    const extraSpaceUnderImage = 10 * scale; // space under image before hazards start
+    const hazardLineHeight = 18 * scale;
+    const extraSpaceUnderImage = 10 * scale;
 
     const hazardsCount = planet.hazards ? planet.hazards.length : 0;
 
     const boxWidth = imgWidth + padding * 2;
-    // box height includes: two text lines + separator + image + space + hazards lines + padding top/bottom
-    const boxHeight = textHeight * 2 + lineHeight + imgHeight + extraSpaceUnderImage + hazardsCount * hazardLineHeight + padding * 2;
+
+
+    const nameLineHeight = 16 * scale;
+    const textMaxWidth = boxWidth - 2 * padding;
+
+    // Measure wrapped text height of planet.name (should not wrap now)
+    const wrappedTextHeight = measureWrappedText(ctx, planet.name, textMaxWidth, nameLineHeight);
+
+    const boxHeight =
+        wrappedTextHeight +
+        lineHeight +
+        textHeight +
+        imgHeight +
+        extraSpaceUnderImage +
+        hazardsCount * hazardLineHeight +
+        padding * 2;
 
     const radius = 10 * scale;
 
+    const topY = y - boxHeight / 2;
+
     ctx.fillStyle = "rgba(0, 122, 204, 0.8)";
-    roundRect(ctx, x + 15 * scale, y - boxHeight / 2, boxWidth, boxHeight, radius);
+    roundRect(ctx, x + 15 * scale, topY, boxWidth, boxHeight, radius);
     ctx.fill();
 
     ctx.fillStyle = "white";
-    ctx.font = `bold ${16 * scale}px Arial`;
+    ctx.font = `bold ${nameLineHeight}px Arial`;
     ctx.textBaseline = "top";
 
-    // First line (planet.name)
-    ctx.fillText(planet.name, x + 15 * scale + padding, y - boxHeight / 2 + padding);
+    let currentY = topY + padding;
 
-    // Draw separator line
-    const lineY = y - boxHeight / 2 + padding + textHeight;
+    ctx.fillText(planet.name, x + 15 * scale + padding, currentY);
+
+    currentY += wrappedTextHeight;
+
+    currentY += padding / 2;
     ctx.strokeStyle = "white";
     ctx.lineWidth = lineHeight;
     ctx.beginPath();
-    ctx.moveTo(x + 15 * scale + padding, lineY);
-    ctx.lineTo(x + 15 * scale + boxWidth - padding, lineY);
+    ctx.moveTo(x + 15 * scale + padding, currentY);
+    ctx.lineTo(x + 15 * scale + boxWidth - padding, currentY);
     ctx.stroke();
+    currentY += lineHeight + padding / 2;
 
-    // Second line (biome.name)
-    const biomeTextY = lineY + padding;
-    ctx.fillText(planet.biome.name, x + 15 * scale + padding, biomeTextY);
+    ctx.fillText(planet.biome.name, x + 15 * scale + padding, currentY);
+    currentY += textHeight;
 
-    // Draw image below biome name
-    const imgY = biomeTextY + textHeight;
     const img = biomeImageCache.get(planet.biome.name);
     if (img && img.complete) {
-        ctx.drawImage(img, x + 15 * scale + padding, imgY, imgWidth, imgHeight);
+        ctx.drawImage(img, x + 15 * scale + padding, currentY, imgWidth, imgHeight);
     }
+    currentY += imgHeight + extraSpaceUnderImage;
 
-    // Draw hazards lines under image, with some space
     if (hazardsCount > 0) {
         ctx.font = `${14 * scale}px Arial`;
         ctx.textBaseline = "top";
-        const hazardsStartY = imgY + imgHeight + extraSpaceUnderImage;
         planet.hazards.forEach((hazard, idx) => {
-            ctx.fillText(`• ${hazard.name}`, x + 15 * scale + padding, hazardsStartY + idx * hazardLineHeight);
+            ctx.fillText(`• ${hazard.name}`, x + 15 * scale + padding, currentY + idx * hazardLineHeight);
         });
     }
 }
+
+
+
+// #endregion
+
+// #region Helper functions
+
+function measureWrappedText(ctx, text, maxWidth, lineHeight) {
+    const words = text.split(' ');
+    let line = '';
+    let lines = 0;
+
+    for (let i = 0; i < words.length; i++) {
+        const testLine = line + words[i] + (i < words.length - 1 ? ' ' : '');
+        const width = ctx.measureText(testLine).width;
+        console.log(`Test line: "${testLine}", width: ${width}`);
+
+        if (width > maxWidth && line !== '') {
+            lines++;
+            console.log("maxwidth", maxWidth);
+            console.log(`Line wrapped: "${line.trim()}"`);
+            line = words[i] + ' ';
+        } else {
+            line = testLine;
+        }
+    }
+    if (line.trim() !== '') {
+        lines++;
+        console.log(`Last line: "${line.trim()}"`);
+    }
+    console.log("maxwidth", maxWidth);
+    console.log(`Total lines: ${lines}`);
+
+    return lines * lineHeight;
+}
+
+function drawWrappedText(ctx, text, x, y, maxWidth, lineHeight) {
+    console.log("max width in drawing", maxWidth)
+    const words = text.split(' ');
+    let line = '';
+    let lineNumber = 0;
+
+    for (let i = 0; i < words.length; i++) {
+        const testLine = line + words[i] + ' ';
+        const width = ctx.measureText(testLine).width;
+        console.log("width in drawing", width)
+        if (width > maxWidth && i > 0) {
+            ctx.fillText(line.trim(), x, y + lineNumber * lineHeight);
+            line = words[i] + ' ';
+            lineNumber++;
+        } else {
+            line = testLine;
+        }
+    }
+    ctx.fillText(line.trim(), x, y + lineNumber * lineHeight);
+}
+
 
 function roundRect(ctx, x, y, width, height, radius) {
     ctx.beginPath();
@@ -622,8 +696,9 @@ function drawHalfCirclePoly(cx, cy, radius, startAngle, endAngle, fillColor) {
     ctx.fill();
 }
 
+// #endregion
 
-//#region Hamburger Button
+// #region Hamburger Button
 
 const hamburgerBtn = document.getElementById("hamburgerBtn");
 const biomeList = document.getElementById("biomeList");
@@ -682,7 +757,7 @@ window.addEventListener("resize", updateCanvasRight);
 
 //#endregion
 
-//#region Hide Button
+// #region Hide Button
 
 const hideBtn = document.getElementById("hideBtn");
 
@@ -692,9 +767,9 @@ hideBtn.addEventListener("click", () => {
     drawPlanets();
 });
 
-//#endregion
+// #endregion
 
-//#region Tutorial Button
+// #region Tutorial Button
 
 const dialogBtn = document.getElementById('dialogBtn');
 const closeDialogBtn = document.getElementById('closeDialogBtn');
