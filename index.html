@@ -68,13 +68,79 @@
 
   <div id="biomeList"></div>
 
-  <div id="kofi-container">
-    <script type="text/javascript" src="https://storage.ko-fi.com/cdn/widget/Widget_2.js"></script>
-    <script type="text/javascript">
-      kofiwidget2.init('Support Democracy on Ko-fi', '#000000', 'R6R61HLS1K');
-      kofiwidget2.draw();
-    </script>
-  </div>
+  <style>
+  #kofi-wrapper {
+    position: fixed;
+    bottom: 10px;
+    left: 10px;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    background: #000;
+    border-radius: 8px;
+    box-shadow: 0 0 6px 2px rgba(128, 128, 128, 0.5);
+    cursor: pointer;
+    overflow: hidden;
+
+    height: 48px;
+    width: 27px;
+    padding: 0 8px;
+
+    transition: width 0.35s ease;
+  }
+
+  #kofi-wrapper:hover {
+    width: 270px; /* larger expand */
+  }
+
+  #kofi-icon-container {
+    flex-shrink: 0;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  #kofi-text {
+    white-space: nowrap;
+    color: white;
+    font-family: Arial, sans-serif;
+    font-weight: bold;
+    margin-left: 12px;
+
+    opacity: 0;
+    transform: translateX(-10px);
+    transition: opacity 0.35s ease, transform 0.35s ease;
+    pointer-events: none;
+  }
+
+  #kofi-wrapper:hover #kofi-text {
+    opacity: 1;
+    transform: translateX(0);
+    pointer-events: auto;
+  }
+</style>
+
+<div id="kofi-wrapper" title="Support Democracy on Ko-fi">
+  <div id="kofi-icon-container"></div>
+  <div id="kofi-text">Support Democracy on Ko-fi</div>
+</div>
+
+<script type='text/javascript' src='https://storage.ko-fi.com/cdn/widget/Widget_2.js'></script>
+<script>
+  kofiwidget2.init('', '#000000', 'R6R61HLS1K');
+  kofiwidget2.draw();
+
+  window.addEventListener('load', () => {
+    const widgetDiv = document.querySelector('.kofi-button');
+    const iconContainer = document.getElementById('kofi-icon-container');
+    if (widgetDiv && iconContainer) {
+      iconContainer.appendChild(widgetDiv);
+    }
+  });
+</script>
+
 
   <script src="app.js"></script>
 </body>
