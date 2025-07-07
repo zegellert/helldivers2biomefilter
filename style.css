@@ -562,6 +562,7 @@ body {
     box-shadow: 0 0 6px 2px rgba(128, 128, 128, 0.5);
     cursor: pointer;
     overflow: hidden;
+    font-family: 'SquaresBold';
 
     height: 48px;
     width: 32px;
@@ -571,8 +572,7 @@ body {
 }
 
 #kofi-wrapper:hover {
-    width: 270px;
-    /* larger expand */
+    width: 345px;
 }
 
 #kofi-icon-container {
@@ -592,7 +592,7 @@ body {
 #kofi-text {
     white-space: nowrap;
     color: white;
-    font-family: Arial, sans-serif;
+    font-family: 'SquaresBold';
     font-weight: bold;
     margin-left: 12px;
 
