@@ -4,7 +4,7 @@
     "archetype": "Sandy",
     "description": "A blazing-hot desert planet, its rocky mesas are the sole interruptions to the endless sea of dunes.",
     "image": "images/desert_dunes.jpg",
-    "hippos": 3
+    "hippos": 4
   },
   {
     "name": "Desert Cliffs",
@@ -102,7 +102,7 @@
     "archetype": "Moor",
     "description": "Scorching temperatures, high winds, and low precipitation cause a near‑constant cycle of fires to sweep this planet, punctuated by short bursts of lush rebirth between infernos.",
     "image": "images/scorched_moor.jpg",
-    "hippos": 3
+    "hippos": 4
   },
   {
     "name": "Ionic Crimson",
